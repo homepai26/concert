@@ -99,7 +99,8 @@ document.getElementById('ticketForm').addEventListener('submit', async (e) => {
         const response = await fetch('/api/book-ticket', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify({
                 concertId,
