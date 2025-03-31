@@ -120,4 +120,35 @@ document.getElementById('ticketForm').addEventListener('submit', async (e) => {
         console.error('Error booking ticket:', error);
         alert('Error booking ticket');
     }
+});
+
+// ฟังก์ชันล็อกอิน
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        if (result.token) {
+            // เก็บ token ใน localStorage
+            localStorage.setItem('token', result.token);
+            alert('Login successful!');
+            loadConcerts(); // โหลดคอนเสิร์ตหลังจากล็อกอินสำเร็จ
+        } else {
+            alert('Login failed: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        alert('Error during login');
+    }
 }); 
