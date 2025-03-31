@@ -35,7 +35,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
         const result = await response.json();
         if (result.success) {
-            alert('Registration successful! Please check your email to verify your account.');
+            alert('Registration successful! You can now log in.');
             showLoginForm(); // แสดงฟอร์มล็อกอินหลังจากลงทะเบียนสำเร็จ
         } else {
             alert('Registration failed: ' + result.message);

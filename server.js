@@ -67,24 +67,12 @@ app.post('/api/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         
-        // Generate verification token
-        const verificationToken = jwt.sign({ email }, 'your_jwt_secret');
-
+        // ลบการสร้าง verification_token
         const [result] = await db.execute(
-            'INSERT INTO users (username, password, email, verification_token) VALUES (?, ?, ?, ?)',
-            [username, hashedPassword, email, verificationToken]
+            'INSERT INTO users (username, password, email, verified) VALUES (?, ?, ?, true)',
+            [username, hashedPassword, email]
         );
 
-        // Send verification email
-        const mailOptions = {
-            from: 'your_email@gmail.com',
-            to: email,
-            subject: 'Verify Your Email',
-            html: `Click <a href="http://localhost:3000/verify/${verificationToken}">here</a> to verify your email.`
-        };
-
-        await transporter.sendMail(mailOptions);
-        
         res.json({ success: true, userId: result.insertId });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -102,8 +90,7 @@ app.post('/api/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, users[0].password);
         if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
         
-        if (!users[0].verified) return res.status(400).json({ message: 'Please verify your email first' });
-
+        // ลบการตรวจสอบสถานะการยืนยันอีเมล
         const token = jwt.sign({ id: users[0].id }, 'your_jwt_secret');
         res.header('Authorization', token).json({ token });
     } catch (error) {
