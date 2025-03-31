@@ -3,62 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concert Booking System</title>
+    <title data-translate="title">Concert Booking System</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="language-selector">
+        <button onclick="changeLanguage('en')">English</button>
+        <button onclick="changeLanguage('th')">ไทย</button>
+    </div>
     <div class="container">
         <div id="auth-section" class="auth-section">
             <div id="login-form" class="auth-form">
-                <h2>Login</h2>
+                <h2 data-translate="login">Login</h2>
                 <form id="loginForm">
                     <div class="form-group">
-                        <input type="text" id="loginUsername" placeholder="Username" required>
+                        <input type="text" id="loginUsername" data-translate="username" placeholder="Username" required>
                     </div>
                     <div class="form-group">
-                        <input type="password" id="loginPassword" placeholder="Password" required>
+                        <input type="password" id="loginPassword" data-translate="password" placeholder="Password" required>
                     </div>
-                    <button type="submit">Login</button>
+                    <button type="submit" data-translate="loginButton">Login</button>
                 </form>
-                <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+                <p><span data-translate="noAccount">Don't have an account?</span> 
+                   <a href="#" id="showRegister" data-translate="register">Register</a></p>
             </div>
 
             <div id="register-form" class="auth-form hidden">
-                <h2>Register</h2>
+                <h2 data-translate="register">Register</h2>
                 <form id="registerForm">
                     <div class="form-group">
-                        <input type="text" id="registerUsername" placeholder="Username" required>
+                        <input type="text" id="registerUsername" data-translate="username" placeholder="Username" required>
                     </div>
                     <div class="form-group">
-                        <input type="email" id="registerEmail" placeholder="Email" required>
+                        <input type="email" id="registerEmail" data-translate="email" placeholder="Email" required>
                     </div>
                     <div class="form-group">
-                        <input type="password" id="registerPassword" placeholder="Password" required>
+                        <input type="password" id="registerPassword" data-translate="password" placeholder="Password" required>
                     </div>
-                    <button type="submit">Register</button>
+                    <button type="submit" data-translate="registerButton">Register</button>
                 </form>
-                <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+                <p><span data-translate="haveAccount">Already have an account?</span> 
+                   <a href="#" id="showLogin" data-translate="login">Login</a></p>
             </div>
         </div>
 
-        <h1>Concert Booking System</h1>
+        <h1 data-translate="title">Concert Booking System</h1>
         
         <div id="concertList" class="concert-list">
             <!-- Concerts will be loaded here -->
         </div>
 
         <div id="bookingForm" class="booking-form hidden">
-            <h2>Book Ticket</h2>
+            <h2 data-translate="bookTicket">Book Ticket</h2>
             <form id="ticketForm">
                 <input type="hidden" id="concertId">
                 <div class="form-group">
-                    <label for="seatNumber">Select Seat:</label>
+                    <label for="seatNumber" data-translate="selectSeat">Select Seat:</label>
                     <select id="seatNumber" required></select>
                 </div>
-                <button type="submit">Book Now</button>
+                <button type="submit" data-translate="book">Book Now</button>
             </form>
         </div>
     </div>
+    <script src="translations.js"></script>
     <script src="app.js"></script>
 </body>
 </html> 

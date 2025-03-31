@@ -1,4 +1,28 @@
+// เพิ่มตัวแปรสำหรับเก็บภาษาปัจจุบัน
+let currentLang = localStorage.getItem('language') || 'en';
+
+// ฟังก์ชันเปลี่ยนภาษา
+function changeLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('language', lang);
+    translatePage();
+    loadConcerts(); // โหลดคอนเสิร์ตใหม่เพื่อแสดงในภาษาที่เลือก
+}
+
+// ฟังก์ชันแปลหน้าเว็บ
+function translatePage() {
+    document.querySelectorAll('[data-translate]').forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (element.tagName === 'INPUT') {
+            element.placeholder = translations[currentLang][key];
+        } else {
+            element.textContent = translations[currentLang][key];
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    translatePage();
     loadConcerts();
     document.getElementById('showRegister').addEventListener('click', showRegisterForm);
     document.getElementById('showLogin').addEventListener('click', showLoginForm);
@@ -35,14 +59,14 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
         const result = await response.json();
         if (result.success) {
-            alert('Registration successful! You can now log in.');
+            alert(translations[currentLang].registerSuccess);
             showLoginForm(); // แสดงฟอร์มล็อกอินหลังจากลงทะเบียนสำเร็จ
         } else {
-            alert('Registration failed: ' + result.message);
+            alert(translations[currentLang].registerFailed + result.message);
         }
     } catch (error) {
         console.error('Error during registration:', error);
-        alert('Error during registration');
+        alert(translations[currentLang].registrationError);
     }
 });
 
@@ -56,13 +80,13 @@ async function loadConcerts() {
         concertList.innerHTML = concerts.map(concert => `
             <div class="concert-card">
                 <h3>${concert.name}</h3>
-                <p>Date: ${new Date(concert.date).toLocaleDateString()}</p>
-                <p>Time: ${concert.time}</p>
-                <p>Venue: ${concert.venue}</p>
-                <p>Available Seats: ${concert.available_seats}</p>
-                <p>Price: $${concert.price}</p>
+                <p>${translations[currentLang].date}: ${new Date(concert.date).toLocaleDateString()}</p>
+                <p>${translations[currentLang].time}: ${concert.time}</p>
+                <p>${translations[currentLang].venue}: ${concert.venue}</p>
+                <p>${translations[currentLang].availableSeats}: ${concert.available_seats}</p>
+                <p>${translations[currentLang].price}: $${concert.price}</p>
                 <button onclick="showBookingForm(${concert.id}, ${concert.available_seats})">
-                    Book Ticket
+                    ${translations[currentLang].bookTicket}
                 </button>
             </div>
         `).join('');
@@ -110,15 +134,15 @@ document.getElementById('ticketForm').addEventListener('submit', async (e) => {
         
         const result = await response.json();
         if (result.success) {
-            alert('Booking successful!');
+            alert(translations[currentLang].bookingSuccess);
             loadConcerts();
             document.getElementById('bookingForm').classList.add('hidden');
         } else {
-            alert('Booking failed: ' + result.message);
+            alert(translations[currentLang].bookingFailed + result.message);
         }
     } catch (error) {
         console.error('Error booking ticket:', error);
-        alert('Error booking ticket');
+        alert(translations[currentLang].bookingError);
     }
 });
 
@@ -140,15 +164,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         const result = await response.json();
         if (result.token) {
-            // เก็บ token ใน localStorage
             localStorage.setItem('token', result.token);
-            alert('Login successful!');
-            loadConcerts(); // โหลดคอนเสิร์ตหลังจากล็อกอินสำเร็จ
+            alert(translations[currentLang].loginSuccess);
+            loadConcerts();
         } else {
-            alert('Login failed: ' + result.message);
+            alert(translations[currentLang].loginFailed + result.message);
         }
     } catch (error) {
         console.error('Error during login:', error);
-        alert('Error during login');
+        alert(translations[currentLang].loginError);
     }
 }); 
