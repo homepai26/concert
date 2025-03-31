@@ -1,7 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
     loadConcerts();
+    document.getElementById('showRegister').addEventListener('click', showRegisterForm);
+    document.getElementById('showLogin').addEventListener('click', showLoginForm);
 });
 
+// ฟังก์ชันแสดงฟอร์มลงทะเบียน
+function showRegisterForm() {
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.remove('hidden');
+}
+
+// ฟังก์ชันแสดงฟอร์มล็อกอิน
+function showLoginForm() {
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('login-form').classList.remove('hidden');
+}
+
+// ฟังก์ชันสำหรับการลงทะเบียน
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('registerUsername').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, email, password })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Registration successful! Please check your email to verify your account.');
+            showLoginForm(); // แสดงฟอร์มล็อกอินหลังจากลงทะเบียนสำเร็จ
+        } else {
+            alert('Registration failed: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error during registration:', error);
+        alert('Error during registration');
+    }
+});
+
+// ฟังก์ชันโหลดคอนเสิร์ต
 async function loadConcerts() {
     try {
         const response = await fetch('/api/concerts');
@@ -26,6 +71,7 @@ async function loadConcerts() {
     }
 }
 
+// ฟังก์ชันแสดงฟอร์มจองตั๋ว
 function showBookingForm(concertId, availableSeats) {
     const bookingForm = document.getElementById('bookingForm');
     const seatSelect = document.getElementById('seatNumber');
@@ -42,6 +88,7 @@ function showBookingForm(concertId, availableSeats) {
     bookingForm.classList.remove('hidden');
 }
 
+// ฟังก์ชันสำหรับการจองตั๋ว
 document.getElementById('ticketForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -55,7 +102,6 @@ document.getElementById('ticketForm').addEventListener('submit', async (e) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                userId: 1, // ในระบบจริงควรใช้ ID ของผู้ใช้ที่ login
                 concertId,
                 seatNumber
             })
