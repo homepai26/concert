@@ -8,11 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // โหลดรายการคอนเสิร์ต
 async function loadConcerts() {
     try {
-        const response = await fetch('/api/admin/concerts', {
-            headers: {
-                'Authorization': localStorage.getItem('adminToken')
-            }
-        });
+        const response = await fetch('/api/admin/concerts');
         const concerts = await response.json();
         
         const concertsList = document.getElementById('concertsList');
@@ -40,11 +36,7 @@ async function loadConcerts() {
 // โหลดรายการจอง
 async function loadBookings() {
     try {
-        const response = await fetch('/api/admin/bookings', {
-            headers: {
-                'Authorization': localStorage.getItem('adminToken')
-            }
-        });
+        const response = await fetch('/api/admin/bookings');
         const bookings = await response.json();
         
         const bookingsList = document.getElementById('bookingsList');
@@ -92,8 +84,7 @@ async function addConcert(e) {
         const response = await fetch('/api/admin/concerts', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('adminToken')
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(concertData)
         });
@@ -124,10 +115,7 @@ async function deleteConcert(concertId) {
 
     try {
         const response = await fetch(`/api/admin/concerts/${concertId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': localStorage.getItem('adminToken')
-            }
+            method: 'DELETE'
         });
 
         const result = await response.json();
@@ -149,8 +137,7 @@ async function updateBookingStatus(bookingId, status) {
         const response = await fetch(`/api/admin/bookings/${bookingId}`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('adminToken')
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ status })
         });
