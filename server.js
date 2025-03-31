@@ -1,70 +1,248 @@
 const express = require('express');
 const session = require('express-session');
-const User = require('./models/User');
-const Booking = require('./models/Booking');
+const cors = require('cors');
+const db = require('./config/database');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const { registerValidation, bookingValidation } = require('./models/validation');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static('public'));
+app.use(cors());
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'your_secret_key',
     resave: false,
     saveUninitialized: false
 }));
 
+// Middleware ตรวจสอบ Token
+const authenticateToken = (req, res, next) => {
+    const token = req.header('Authorization');
+    if (!token) return res.status(401).json({ message: 'Access Denied' });
+
+    try {
+        const verified = jwt.verify(token, 'your_jwt_secret');
+        req.user = verified;
+        next();
+    } catch (error) {
+        res.status(400).json({ message: 'Invalid Token' });
+    }
+};
+
+// ส่งอีเมลยืนยัน
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'your_email@gmail.com',
+        pass: 'your_email_password'
+    }
+});
+
+// Transaction Wrapper Function
+const withTransaction = async (db, callback) => {
+    try {
+        await db.beginTransaction();
+        const result = await callback();
+        await db.commit();
+        return result;
+    } catch (error) {
+        await db.rollback();
+        throw error;
+    }
+};
+
 // API endpoints
 app.post('/api/register', async (req, res) => {
     try {
-        const { username, password, email, language } = req.body;
-        const userId = await User.create(username, password, email, language);
-        res.json({ success: true, userId });
+        // Validate request body
+        const { error } = registerValidation.validate(req.body);
+        if (error) return res.status(400).json({ message: error.details[0].message });
+
+        const { username, password, email } = req.body;
+        
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        // Generate verification token
+        const verificationToken = jwt.sign({ email }, 'your_jwt_secret');
+
+        const [result] = await db.execute(
+            'INSERT INTO users (username, password, email, verification_token) VALUES (?, ?, ?, ?)',
+            [username, hashedPassword, email, verificationToken]
+        );
+
+        // Send verification email
+        const mailOptions = {
+            from: 'your_email@gmail.com',
+            to: email,
+            subject: 'Verify Your Email',
+            html: `Click <a href="http://localhost:3000/verify/${verificationToken}">here</a> to verify your email.`
+        };
+
+        await transporter.sendMail(mailOptions);
+        
+        res.json({ success: true, userId: result.insertId });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
+// Login endpoint
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await User.authenticate(username, password);
         
-        if (user) {
-            req.session.userId = user.id;
-            req.session.language = user.language;
-            res.json({ success: true });
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
-        }
+        const [users] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
+        if (users.length === 0) return res.status(400).json({ message: 'User not found' });
+        
+        const validPassword = await bcrypt.compare(password, users[0].password);
+        if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
+        
+        if (!users[0].verified) return res.status(400).json({ message: 'Please verify your email first' });
+
+        const token = jwt.sign({ id: users[0].id }, 'your_jwt_secret');
+        res.header('Authorization', token).json({ token });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
-app.get('/api/seats', async (req, res) => {
+// Book ticket with payment
+app.post('/api/book-ticket', authenticateToken, async (req, res) => {
     try {
-        const seats = await Booking.getAvailableSeats();
-        res.json(seats);
+        const { error } = bookingValidation.validate(req.body);
+        if (error) return res.status(400).json({ message: error.details[0].message });
+
+        const { concertId, seatNumber } = req.body;
+        const userId = req.user.id;
+
+        const result = await withTransaction(db, async () => {
+            // ตรวจสอบที่นั่งว่างก่อน
+            const [seatCheck] = await db.execute(
+                'SELECT available_seats FROM concerts WHERE id = ? FOR UPDATE',
+                [concertId]
+            );
+
+            if (!seatCheck[0] || seatCheck[0].available_seats <= 0) {
+                throw new Error('No seats available');
+            }
+
+            // ตรวจสอบว่าที่นั่งถูกจองแล้วหรือไม่
+            const [existingSeat] = await db.execute(
+                'SELECT id FROM bookings WHERE concert_id = ? AND seat_number = ? AND status != "cancelled"',
+                [concertId, seatNumber]
+            );
+
+            if (existingSeat.length > 0) {
+                throw new Error('Seat already booked');
+            }
+
+            // สร้างการจอง
+            const [bookingResult] = await db.execute(
+                'INSERT INTO bookings (user_id, concert_id, seat_number, status) VALUES (?, ?, ?, "pending")',
+                [userId, concertId, seatNumber]
+            );
+
+            // สร้างรายการชำระเงิน
+            const [concertPrice] = await db.execute(
+                'SELECT price FROM concerts WHERE id = ?',
+                [concertId]
+            );
+
+            await db.execute(
+                'INSERT INTO payments (booking_id, amount, status) VALUES (?, ?, "pending")',
+                [bookingResult.insertId, concertPrice[0].price]
+            );
+
+            // อัพเดทจำนวนที่นั่ง
+            await db.execute(
+                'UPDATE concerts SET available_seats = available_seats - 1 WHERE id = ?',
+                [concertId]
+            );
+
+            return { bookingId: bookingResult.insertId };
+        });
+
+        res.json({ success: true, ...result });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
-app.post('/api/bookings', async (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Please login first' });
-    }
-    
+// Cancel booking
+app.post('/api/cancel-booking/:bookingId', authenticateToken, async (req, res) => {
     try {
-        const { seatId } = req.body;
-        const bookingId = await Booking.createBooking(req.session.userId, seatId);
-        res.json({ success: true, bookingId });
+        const { bookingId } = req.params;
+        const userId = req.user.id;
+
+        await withTransaction(db, async () => {
+            // ล็อคการจองเพื่อป้องกันการแก้ไขพร้อมกัน
+            const [booking] = await db.execute(
+                'SELECT * FROM bookings WHERE id = ? AND user_id = ? FOR UPDATE',
+                [bookingId, userId]
+            );
+
+            if (booking.length === 0) {
+                throw new Error('Booking not found');
+            }
+
+            if (booking[0].status === 'cancelled') {
+                throw new Error('Booking already cancelled');
+            }
+
+            // ตรวจสอบเวลายกเลิก (เช่น ต้องยกเลิกก่อนคอนเสิร์ต 24 ชั่วโมง)
+            const [concert] = await db.execute(
+                'SELECT date, time FROM concerts WHERE id = ?',
+                [booking[0].concert_id]
+            );
+
+            const concertDateTime = new Date(`${concert[0].date} ${concert[0].time}`);
+            const now = new Date();
+            const hoursDiff = (concertDateTime - now) / (1000 * 60 * 60);
+
+            if (hoursDiff < 24) {
+                throw new Error('Cannot cancel booking less than 24 hours before concert');
+            }
+
+            // อัพเดทสถานะการจอง
+            await db.execute(
+                'UPDATE bookings SET status = "cancelled" WHERE id = ?',
+                [bookingId]
+            );
+
+            // อัพเดทสถานะการชำระเงิน
+            await db.execute(
+                'UPDATE payments SET status = "refunded" WHERE booking_id = ?',
+                [bookingId]
+            );
+
+            // คืนที่นั่ง
+            await db.execute(
+                'UPDATE concerts SET available_seats = available_seats + 1 WHERE id = ?',
+                [booking[0].concert_id]
+            );
+        });
+
+        res.json({ success: true, message: 'Booking cancelled successfully' });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/concerts', async (req, res) => {
+    try {
+        const [concerts] = await db.execute('SELECT * FROM concerts');
+        res.json(concerts);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 }); 
