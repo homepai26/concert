@@ -45,18 +45,18 @@ const transporter = nodemailer.createTransport({
 const withTransaction = async (connection, callback) => {
     try {
         // เริ่ม transaction
-        await connection.execute('START TRANSACTION');
+        await connection.query('START TRANSACTION');
         
         // เรียกใช้ callback function
         const result = await callback();
         
         // ถ้าทุกอย่างสำเร็จ ทำการ commit
-        await connection.execute('COMMIT');
+        await connection.query('COMMIT');
         return result;
     } catch (error) {
         try {
             // ถ้าเกิด error ทำการ rollback
-            await connection.execute('ROLLBACK');
+            await connection.query('ROLLBACK');
         } catch (rollbackError) {
             console.error('Rollback failed:', rollbackError);
         }
@@ -110,7 +110,6 @@ app.post('/api/login', async (req, res) => {
 
 // Book ticket with payment
 app.post('/api/book-ticket', authenticateToken, async (req, res) => {
-    // สร้าง connection ใหม่จาก pool
     const connection = await db.getConnection();
     
     try {
@@ -122,7 +121,7 @@ app.post('/api/book-ticket', authenticateToken, async (req, res) => {
 
         const result = await withTransaction(connection, async () => {
             // ตรวจสอบที่นั่งว่างก่อน
-            const [seatCheck] = await connection.execute(
+            const [seatCheck] = await connection.query(
                 'SELECT available_seats FROM concerts WHERE id = ? FOR UPDATE',
                 [concertId]
             );
@@ -132,7 +131,7 @@ app.post('/api/book-ticket', authenticateToken, async (req, res) => {
             }
 
             // ตรวจสอบว่าที่นั่งถูกจองแล้วหรือไม่
-            const [existingSeat] = await connection.execute(
+            const [existingSeat] = await connection.query(
                 'SELECT id FROM bookings WHERE concert_id = ? AND seat_number = ? AND status != "cancelled"',
                 [concertId, seatNumber]
             );
@@ -142,24 +141,24 @@ app.post('/api/book-ticket', authenticateToken, async (req, res) => {
             }
 
             // สร้างการจอง
-            const [bookingResult] = await connection.execute(
+            const [bookingResult] = await connection.query(
                 'INSERT INTO bookings (user_id, concert_id, seat_number, status) VALUES (?, ?, ?, "pending")',
                 [userId, concertId, seatNumber]
             );
 
             // สร้างรายการชำระเงิน
-            const [concertPrice] = await connection.execute(
+            const [concertPrice] = await connection.query(
                 'SELECT price FROM concerts WHERE id = ?',
                 [concertId]
             );
 
-            await connection.execute(
+            await connection.query(
                 'INSERT INTO payments (booking_id, amount, status) VALUES (?, ?, "pending")',
                 [bookingResult.insertId, concertPrice[0].price]
             );
 
             // อัพเดทจำนวนที่นั่ง
-            await connection.execute(
+            await connection.query(
                 'UPDATE concerts SET available_seats = available_seats - 1 WHERE id = ?',
                 [concertId]
             );
@@ -171,7 +170,6 @@ app.post('/api/book-ticket', authenticateToken, async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     } finally {
-        // คืน connection กลับไปที่ pool
         connection.release();
     }
 });
