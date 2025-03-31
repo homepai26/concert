@@ -32,6 +32,22 @@ const authenticateToken = (req, res, next) => {
     }
 };
 
+// Middleware ตรวจสอบแอดมิน
+const isAdmin = (req, res, next) => {
+    // ในระบบจริงควรตรวจสอบ role จาก token
+    const token = req.header('Authorization');
+    if (!token) return res.status(401).json({ message: 'Access Denied' });
+
+    try {
+        const verified = jwt.verify(token, 'your_jwt_secret');
+        if (!verified.isAdmin) return res.status(403).json({ message: 'Admin access required' });
+        req.user = verified;
+        next();
+    } catch (error) {
+        res.status(400).json({ message: 'Invalid Token' });
+    }
+};
+
 // ส่งอีเมลยืนยัน
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -237,6 +253,67 @@ app.get('/api/concerts', async (req, res) => {
     try {
         const [concerts] = await db.execute('SELECT * FROM concerts');
         res.json(concerts);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Admin API endpoints
+app.get('/api/admin/concerts', isAdmin, async (req, res) => {
+    try {
+        const [concerts] = await db.execute('SELECT * FROM concerts');
+        res.json(concerts);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/admin/concerts', isAdmin, async (req, res) => {
+    try {
+        const { name, date, time, venue, total_seats, available_seats, price } = req.body;
+        
+        const [result] = await db.execute(
+            'INSERT INTO concerts (name, date, time, venue, total_seats, available_seats, price) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, date, time, venue, total_seats, available_seats, price]
+        );
+
+        res.json({ success: true, concertId: result.insertId });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.delete('/api/admin/concerts/:id', isAdmin, async (req, res) => {
+    try {
+        await db.execute('DELETE FROM concerts WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.get('/api/admin/bookings', isAdmin, async (req, res) => {
+    try {
+        const [bookings] = await db.execute(`
+            SELECT b.*, c.name as concert_name, u.username 
+            FROM bookings b 
+            JOIN concerts c ON b.concert_id = c.id 
+            JOIN users u ON b.user_id = u.id
+        `);
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.patch('/api/admin/bookings/:id', isAdmin, async (req, res) => {
+    try {
+        const { status } = req.body;
+        await db.execute(
+            'UPDATE bookings SET status = ? WHERE id = ?',
+            [status, req.params.id]
+        );
+        res.json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
