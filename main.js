@@ -1,16 +1,7 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
+const pool = require('config/database.js');
 
 const app = express();
-const pool = mysql.createPool({
-    host: 'warit.pp.ua',
-    user: 'concert_user',
-    password: 'OPyyMk99f67Z',
-    database: 'concert_booking',
-    waitForConnections: true,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0,
-});
 
 const main = async() => {
     try {
@@ -25,5 +16,6 @@ const main = async() => {
 	    console.log(error);
     }
 };
+
 
 main();
