@@ -1,21 +1,11 @@
 const express = require('express');
-const pool = require('config/database.js');
+const cors = require('cors');
+const router = require('./route');
 
 const app = express();
+app.use(cors());
+app.use(router);
 
-const main = async() => {
-    try {
-	const [row, field] = await pool.execute('SELECT * FROM customer');
-	app.get('/', (req, res) => {
-	    res.send(row);
-	});
-
-	app.listen(3000);
-    } catch (error) {
-	if (error)
-	    console.log(error);
-    }
-};
-
-
-main();
+app.listen(3000, () => {
+    console.log('Now app is listen on port 3000');
+});
