@@ -3,12 +3,13 @@ const mysql = require('mysql2/promise');
 
 const app = express();
 const pool = mysql.createPool({
-  host: '127.0.0.1',
-  user: 'concert_user',
-  database: 'concert_booking',
-  waitForConnections: true,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
+    host: '127.0.0.1',
+    user: 'concert_user',
+    password: 'OPyyMk99f67Z',
+    database: 'concert_booking',
+    waitForConnections: true,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
 });
 
 const main = async() => {
