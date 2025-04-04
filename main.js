@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 
 const app = express();
 const pool = mysql.createPool({
-    host: '127.0.0.1',
+    host: 'warit.pp.ua',
     user: 'concert_user',
     password: 'OPyyMk99f67Z',
     database: 'concert_booking',
@@ -14,9 +14,9 @@ const pool = mysql.createPool({
 
 const main = async() => {
     try {
-	const [row, field] = pool.execute('SELECT * FROM users');
+	const [row, field] = await pool.execute('SELECT * FROM customer');
 	app.get('/', (req, res) => {
-	    res.send(JSON.stringify(field));
+	    res.send(row);
 	});
 
 	app.listen(3000);
