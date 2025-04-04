@@ -1,0 +1,29 @@
+{
+    "concert_name": "Prawit Crybady",
+    "concert_artist": "Prawit Wongsuwan",
+    "concert_venue": "Thai Army",
+    "concert_timeshow": "2025-02-02 10:00:00",
+    "seats": [
+	{
+	    "type": "Front",
+	    "price": "5000",
+	    "seat_start": "1",
+	    "seat_end": "20",
+	    "seat_available": "20"
+	},
+	{
+	    "type": "Middle",
+	    "price": "2500",
+	    "seat_start": "21",
+	    "seat_end": "40",
+	    "seat_available": "20"
+	},
+	{
+	    "type": "Stand",
+	    "price": "1250",
+	    "seat_start": "41",
+	    "seat_end": "100",
+	    "seat_available": "60"
+	}
+    ]
+}

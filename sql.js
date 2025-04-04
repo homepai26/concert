@@ -1,4 +1,5 @@
 const pool = require('./config/database.js');
+var result = null;
 
 const add_concert_info = async(concert_name, concert_artist, concert_venue, concert_timeshow) => {
     if (concert_name && concert_artist && concert_venue && concert_timeshow) {
@@ -9,6 +10,7 @@ const add_concert_info = async(concert_name, concert_artist, concert_venue, conc
 	    console.log(error);
 	}
     }
+    return result;
 };
 
 const add_concert_seat = async(concert_id, seat_type_id, seat_start, seat_end, seat_available) => {
@@ -20,6 +22,7 @@ const add_concert_seat = async(concert_id, seat_type_id, seat_start, seat_end, s
 	    console.log(error);
 	}
     }
+    return result;
 };
 
 const add_thai_customer = async(name, birthdate, email, id) => {
@@ -31,6 +34,7 @@ const add_thai_customer = async(name, birthdate, email, id) => {
 	    console.log(error);
 	}
     }
+    return result;
 };
 
 const add_foreign_customer = async(name, birthdate, email, passport) => {
@@ -42,6 +46,7 @@ const add_foreign_customer = async(name, birthdate, email, passport) => {
 	    console.log(error);
 	}
     }
+    return result;
 };
 
 const add_reserved_seat = async(concert_id, seat_no, customer_id) => {
@@ -53,6 +58,7 @@ const add_reserved_seat = async(concert_id, seat_no, customer_id) => {
 	    console.log(error);
 	}
     }
+    return result;
 };
 
 const add_seat_type = async(type, price) => {
@@ -64,6 +70,7 @@ const add_seat_type = async(type, price) => {
 	    console.log(error);
 	}
     }
+    return result;
 };
 
 const add_ticket = async(concert_name, name, venue, seat, timeshow, purchase_datetime) => {
@@ -75,6 +82,12 @@ const add_ticket = async(concert_name, name, venue, seat, timeshow, purchase_dat
 	    console.log(error);
 	}
     }
+    return result;
+};
+
+const view_concert = async() => {
+    [row, field] = await pool.execute('SELECT * FROM concert_info');
+    return row;
 };
 
 module.exports.add_concert_info = add_concert_info;
@@ -84,3 +97,4 @@ module.exports.add_foreign_customer = add_foreign_customer;
 module.exports.add_reserved_seat = add_reserved_seat;
 module.exports.add_seat_type = add_seat_type;
 module.exports.add_ticket = add_ticket;
+module.exports.view_concert = view_concert;
