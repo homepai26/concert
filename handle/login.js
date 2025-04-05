@@ -1,15 +1,18 @@
 var jwt = require('jsonwebtoken');
+const secert_key = 't6+JsrlMOWqsgmKQs80yPApoKkIXlqjk4M+Pl6z5A+c=';
 
 const gen_customer_token = (customer_id) => {
-    var token = jwt.sign({ customer_id: customer_id }, 't6+JsrlMOWqsgmKQs80yPApoKkIXlqjk4M+Pl6z5A+c=', { expiresIn: '7d' });
+    var token = jwt.sign({ customer_id: customer_id }, secert_key, { expiresIn: '7d' });
     return token;
 };
 
 const get_value = (token) => {
-    jwt.verify(token, 'wrong-secret', function(err, decoded) {
+    var value;
+    jwt.verify(token, secert_key, function(err, decoded) {
 	if (err) throw err;
-	return decoded;
+	value =  decoded;
     });
+    return value;
 };
 
 module.exports.gen_customer_token = gen_customer_token;
