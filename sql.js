@@ -17,18 +17,18 @@ const add_concert_seat = async(conn, concert_id, seat_type_id, seat_start, seat_
     return result;
 };
 
-const add_thai_customer = async(conn, name, birthdate, email, id) => {
+const add_thai_customer = async(conn, name, birthdate, email, id, password) => {
     if (name && birthdate && email && id) {
-	[result] = await conn.execute('INSERT INTO customer(name, birthdate, email, id) VALUES (?,?,?,?)',
-				      [name, birthdate, email, id]);
+	[result] = await conn.execute('INSERT INTO customer(name, birthdate, email, id, password) VALUES (?,?,?,?,?)',
+				      [name, birthdate, email, id, password]);
     }
     return result;
 };
 
-const add_foreign_customer = async(conn, name, birthdate, email, passport) => {
+const add_foreign_customer = async(conn, name, birthdate, email, passport, password) => {
     if (name && birthdate && email && id) {
-	[result] = await conn.execute('INSERT INTO customer(name, birthdate, email, passport) VALUES (?,?,?,?)',
-				      [name, birthdate, email, passport]);
+	[result] = await conn.execute('INSERT INTO customer(name, birthdate, email, passport, password) VALUES (?,?,?,?,?)',
+				      [name, birthdate, email, passport, password]);
     }
     return result;
 };
@@ -57,8 +57,22 @@ const add_ticket = async(conn, concert_name, name, venue, seat, timeshow, purcha
     return result;
 };
 
-const view_concert = async(conn) => {
+const view_concert_info = async(conn) => {
     [row, field] = await conn.execute('SELECT * FROM concert_info');
+    return row;
+};
+
+const view_concert_seat = async(conn, id) => {
+    [row, field] = await conn.execute('SELECT cs.concert_id, cs.seat_type_id, st.type, cs.seat_start, cs.seat_end,' +
+				      'cs.seat_available, st.price FROM concert_seat cs LEFT JOIN seat_type st ' +
+				      'ON cs.seat_type_id = st.seat_type_id WHERE cs.concert_id = ?', [id]);
+    return row;
+};
+
+const view_reserved_seat = async(conn, id) => {
+    [row, field] = await conn.execute('SELECT rs.concert_id, rs.seat_no, rs.customer_id, c.name FROM ' +
+				      'reserved_seat rs JOIN customer c ON rs.customer_id = c.customer_id ' +
+				      'WHERE rs.concert_id = ?', [id]);
     return row;
 };
 
@@ -69,4 +83,6 @@ module.exports.add_foreign_customer = add_foreign_customer;
 module.exports.add_reserved_seat = add_reserved_seat;
 module.exports.add_seat_type = add_seat_type;
 module.exports.add_ticket = add_ticket;
-module.exports.view_concert = view_concert;
+module.exports.view_concert_info = view_concert_info;
+module.exports.view_concert_seat = view_concert_seat;
+module.exports.view_reserved_seat = view_reserved_seat;
