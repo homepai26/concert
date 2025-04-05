@@ -18,7 +18,7 @@ const add_concert_seat = async(conn, concert_id, seat_type_id, seat_start, seat_
 };
 
 const add_thai_customer = async(conn, name, birthdate, email, id, password) => {
-    if (name && birthdate && email && id) {
+    if (name && birthdate && email && id && password) {
 	[result] = await conn.execute('INSERT INTO customer(name, birthdate, email, id, password) VALUES (?,?,?,?,?)',
 				      [name, birthdate, email, id, password]);
     }
@@ -26,7 +26,7 @@ const add_thai_customer = async(conn, name, birthdate, email, id, password) => {
 };
 
 const add_foreign_customer = async(conn, name, birthdate, email, passport, password) => {
-    if (name && birthdate && email && id) {
+    if (name && birthdate && email && id && password) {
 	[result] = await conn.execute('INSERT INTO customer(name, birthdate, email, passport, password) VALUES (?,?,?,?,?)',
 				      [name, birthdate, email, passport, password]);
     }

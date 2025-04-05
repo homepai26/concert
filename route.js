@@ -43,14 +43,17 @@ router.get('/api/concert', async(req, res) => {
 router.post('/api/register', async(req, res) => {
     try {
 	var conn = await pool.getConnection();
-	if (req.body.id) 
+	console.log(req.body);
+	if (req.body.id) {
+	    let hash_passwd = await encrypt.hash_password(req.body.password);
 	    result = await sql.add_thai_customer(conn, req.body.name, req.body.birthdate, req.body.email,
-						 req.body.id, encrypt.hash_password(req.body.password));
-	
-	else if (req.body.passport)
+						 req.body.id, hash_passwd);
+	    console.log("add_thai_customer");
+	} else if (req.body.passport) {
+	    let hash_passwd = await encrypt.hash_password(req.body.password);
 	    result = await sql.add_foreign_customer(conn, req.body.name, req.body.birthdate, req.body.email,
-						    req.body.passport, encrypt.hash_password(req.body.password));
-	
+						    req.body.passport, hash_passwd);
+	}
 	res.json(result);
     } catch(error) {
 	res.send(error);
@@ -68,9 +71,9 @@ router.put('/api/login', async(req, res) => {
 	}
 
 	var conn = await pool.getConnection();
-	var result = await conn.execute('SELECT customer_id, password FROM customer WHERE email = ?', [email]);
-	if (encrypt.check_password(password, result.password)) {
-	    token = login.gen_customer_token(result.customer_id);
+	let [[row], field] = await conn.execute('SELECT customer_id, password FROM customer WHERE email = ?', [email]);
+	if (await encrypt.check_password(password, row.password)) {
+	    token = login.gen_customer_token(row.customer_id);
 	    res.json(token);
 	}
     } catch (error) {
@@ -81,7 +84,8 @@ router.put('/api/login', async(req, res) => {
 router.post('/api/reserved_seat', async(req, res) => {
     try {
 	var conn = await pool.getConnection();
-	result = await sql.add_reserved_seat(conn, req.body.concert_id, req.body.seat_no, req.body.customer_id);
+	var customer_id = login.get_value(req.body.token);
+	result = await sql.add_reserved_seat(conn, req.body.concert_id, req.body.seat_no, customer_id);
 	res.json(result);
     } catch(error) {
 	res.send(error);

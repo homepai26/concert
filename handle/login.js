@@ -1,7 +1,7 @@
 var jwt = require('jsonwebtoken');
 
 const gen_customer_token = (customer_id) => {
-    var token = jwt.sign({ customer_if: customer_id }, 't6+JsrlMOWqsgmKQs80yPApoKkIXlqjk4M+Pl6z5A+c=', { expiresIn: '7d' });
+    var token = jwt.sign({ customer_id: customer_id }, 't6+JsrlMOWqsgmKQs80yPApoKkIXlqjk4M+Pl6z5A+c=', { expiresIn: '7d' });
     return token;
 };
 
