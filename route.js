@@ -6,7 +6,7 @@ const encrypt = require('./encrypt');
 const login = require('./handle/login');
 const datetime = require('./handle/datetime');
 
-router.post('/api/concert', async(req, res) => {
+router.post('/concert', async(req, res) => {
     var conn = await pool.getConnection();
     try {
 	await conn.execute('START TRANSACTION');
@@ -29,7 +29,7 @@ router.post('/api/concert', async(req, res) => {
     conn.release();
 });
 
-router.get('/api/concert', async(req, res) => {
+router.get('/concert', async(req, res) => {
     try {
 	var conn = await pool.getConnection();
 	result = await sql.view_concert_info(conn);
@@ -41,7 +41,7 @@ router.get('/api/concert', async(req, res) => {
     conn.release();
 });
 
-router.post('/api/register', async(req, res) => {
+router.post('/register', async(req, res) => {
     try {
 	var conn = await pool.getConnection();
 	console.log(req.body);
@@ -63,7 +63,7 @@ router.post('/api/register', async(req, res) => {
     conn.release();
 });
 
-router.put('/api/login', async(req, res) => {
+router.put('/login', async(req, res) => {
     try {
 	var token;
 	let {email, password} = req.body;
@@ -86,7 +86,7 @@ router.put('/api/login', async(req, res) => {
     }
 });
 
-router.post('/api/reserved_seat', async(req, res) => {
+router.post('/reserved_seat', async(req, res) => {
     var conn = await pool.getConnection();
     try {
 	let { customer_id } = login.get_value(req.cookies.token);
@@ -116,7 +116,7 @@ router.post('/api/reserved_seat', async(req, res) => {
     conn.release();
 });
 
-router.get('/api/concert_seat/:id', async(req, res) => {
+router.get('/concert_seat/:id', async(req, res) => {
     try {
 	var conn = await pool.getConnection();
 	result = await sql.view_concert_seat(conn, req.params.id);
@@ -126,7 +126,7 @@ router.get('/api/concert_seat/:id', async(req, res) => {
     }
 });
 
-router.get('/api/reserved_seat/:id', async(req, res) => {
+router.get('/reserved_seat/:id', async(req, res) => {
     try {
 	var conn = await pool.getConnection();
 	result = await sql.view_reserved_seat(conn, req.params.id);

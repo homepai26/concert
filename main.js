@@ -11,7 +11,10 @@ app.use(cors());
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use('/', router);
+app.set("view engine","ejs");
+
+app.use('/api', router);
+app.use('/', express.static('views'));
 
 app.listen(3000, () => {
     console.log('Now app is listen on port 3000');
