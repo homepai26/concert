@@ -74,7 +74,7 @@ const seats_selector = async(concerts, seats) => {
 	const modal_body = document.getElementById(`modal-body-concert-${concerts[i].concert_id}`);
 	for (j in seats[i].concert_seat) {
 	    let type = document.createElement('h4');
-	    type.innerText = seats[i].concert_seat[j].type;
+	    type.innerText = seats[i].concert_seat[j].type + " - ราคา " + seats[i].concert_seat[j].price + "บาท";
 	    modal_body.appendChild(type);
 
 	    for (let k = seats[i].concert_seat[j].seat_start; k <= seats[i].concert_seat[j].seat_end; k++) {
