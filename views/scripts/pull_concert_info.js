@@ -1,6 +1,10 @@
 const concertsFrame = document.getElementById('concerts_frame');
 const modals = document.getElementById('modals');
 
+const get_cookie = (cookie) => {
+    return document.cookie.match(`/^(.*;)?\s*${cookie}\s*=\s*[^;]+(.*)?$/`);
+};
+
 const get = async (url) => {
     try {
         const response = await fetch(url);
@@ -16,6 +20,7 @@ const get = async (url) => {
     return null;
 };
 
+
 const add_concerts = async (concerts) => {
     var count = 0;
     await concerts.forEach((concert) => {
@@ -26,7 +31,7 @@ const add_concerts = async (concerts) => {
         }
 
         row.innerHTML +=
-	    `<div class="card" style="width: 20%; margin: 20px ">` +
+	    `<div class="card" style="width: 18rem; margin: 20px ">` +
 	    `<img src="..." class="card-img-top" alt="...">` +
 	    `<div class="card-body">` +
 	    `<h5 class="card-title">${concert.concert_name}</h5>` +
@@ -38,12 +43,13 @@ const add_concerts = async (concerts) => {
 	    `<li class="list-group-item">${concert.concert_timeshow}</li>` +
 	    `</ul>` +
 	    `<div class="card-body">` +
-	    `<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#concert_${concert.concert_id}">` +
+	    `<button type="button" class="btn btn-primary" data-bs-toggle="modal"` +
+	    `data-bs-target="#concert_${concert.concert_id}" id="reserved-btn-concert-${concert.concert_id}">` +
 	    `จองที่นั่ง` +
 	    `</button>` +
 	    `</div>` +
 	    `</div>`;
-        
+	
 	count++;
     });
 };
@@ -118,6 +124,19 @@ const seats_selector = async(concerts, seats) => {
     }
 };
 
+const lock_login = async(concerts) => {
+    if (!get_cookie('token')) {
+	let login_alert = document.getElementById('login-alart');
+	login_alert.style.display = 'block';
+    }
+
+    concerts.forEach((concert) => {
+	console.log(`modal-send-btn-concert-${concert.concert_id}`);
+	let reserved_btn_concert = document.getElementById(`reserved-btn-concert-${concert.concert_id}`);
+	reserved_btn_concert.setAttribute('disabled', '');
+    });
+};
+
 const main = async() => {
     let concerts = await get('api/concert');
     let seats = [];
@@ -130,6 +149,7 @@ const main = async() => {
     console.log(seats);
     await add_concerts(concerts);
     await seats_selector(concerts, seats);
+    lock_login(concerts, seats);
 };
 
 main();
