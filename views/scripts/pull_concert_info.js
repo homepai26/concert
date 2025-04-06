@@ -16,17 +16,10 @@ const get = async (url) => {
     return null;
 };
 
-function htmlToNodes(html) {
-    const template = document.createElement('template');
-    template.innerHTML = html;
-    return template.content.childNodes;
-}
-
-const add_to_concerts_frame = async () => {
-    var concerts = await (get('api/concert'));
-    var row_count = 0;
+const add_concerts = async (concerts) => {
+    var count = 0;
     await concerts.forEach((concert) => {
-        if (row_count % 5 == 0) {
+        if (count % 5 == 0) {
             row = document.createElement('div');
             row.classList.add('row');
             concertsFrame.appendChild(row);
@@ -45,41 +38,101 @@ const add_to_concerts_frame = async () => {
 	    `<li class="list-group-item">${concert.concert_timeshow}</li>` +
 	    `</ul>` +
 	    `<div class="card-body">` +
-	    `<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal${row_count}">` +
+	    `<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#concert_${concert.concert_id}">` +
 	    `จองที่นั่ง` +
 	    `</button>` +
 	    `</div>` +
 	    `</div>`;
         
-
-	modals.innerHTML +=
-            `<div class="modal fade" id="modal${row_count}" tabindex="-1" aria-labelledby="exampleModalLabel${row_count}" aria-hidden="true">` +
-            `<div class="modal-dialog">` +
-            `<div class="modal-content">` +
-            `<div class="modal-header">` +
-            `<h1 class="modal-title fs-5" id="exampleModalLabel${row_count}">Modal title</h1>` +
-            `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>` +
-            `</div>` +
-            `<div class="modal-body">` +
-            `...` +
-            `</div>` +
-            `<div class="modal-footer">` +
-            `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>` +
-            `<button type="button" class="btn btn-primary">Save changes</button>` +
-            `</div>` +
-            `</div>` +
-            `</div>` +
-            `</div>`;
-	
-	row_count++;
+	count++;
     });
 };
 
-add_to_concerts_frame();
+const seats_selector = async(concerts, seats) => {
+    for (i in concerts) {
+	modals.innerHTML +=
+	    `<div class="modal fade modal-dialog-scrollable" id="concert_${concerts[i].concert_id}" ` +
+	    `tabindex="-1" aria-labelledby="exampleModalLabelconcert_${concerts[i].concert_id}" aria-hidden="true">` +
+	    `<div class="modal-dialog">` +
+	    `<div class="modal-content">` +
+	    `<div class="modal-header">` +
+	    `<h1 class="modal-title fs-5" id="exampleModalLabelconcert_${concerts[i].concert_id}">` +
+	    `จองที่นั่งคอนเสิร์ต ${concerts[i].concert_name}` +
+	    `</h1>` +
+	    `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>` +
+	    `</div>` +
+	    `<div class="modal-body" id="modal-body-concert-${concerts[i].concert_id}">` +
+	    `</div>` +
+	    `<div class="modal-footer">` +
+	    `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิดหน้านี้</button>` +
+	    `<button type="button" class="btn btn-primary" id="modal-send-btn-concert-${concerts[i].concert_id}">จองเลย!</button>` +
+	    `</div>` +
+	    `</div>` +
+	    `</div>` +
+	    `</div>`;
 
+	const modal_body = document.getElementById(`modal-body-concert-${concerts[i].concert_id}`);
+	for (j in seats[i].concert_seat) {
+	    let type = document.createElement('h4');
+	    type.innerText = seats[i].concert_seat[j].type;
+	    modal_body.appendChild(type);
 
-const myModal = document.getElementById('myModal');
-const myInput = document.getElementById('myInput');
+	    for (let k = seats[i].concert_seat[j].seat_start; k <= seats[i].concert_seat[j].seat_end; k++) {
+		modal_body.innerHTML +=
+		    `<div class="form-check form-check-inline">` +
+		    `<input class="form-check-input" name="seat_radio" type="radio" id="seat${k}" value="${k}">` +
+		    `<label class="form-check-label" for="seat${k}">${k}</label>` +
+		    `</div>`;
+	    }
+	}
+    }
+
+    // disable if have reserved and button event
+    for (i in concerts) {
+	seats[i].reserved_seat.forEach((reserved) => {
+	    let select_seat = document.getElementById(`seat${reserved.seat_no}`);
+	    select_seat.setAttribute('disabled', '');
+	});
+
+	let send_btn = document.getElementById(`modal-send-btn-concert-${concerts[i].concert_id}`);
+	send_btn.addEventListener('click', async() => {
+	    let want_reserved_seat = document.querySelector('input[name="seat_radio"]:checked').value;
+	    try {
+		const rawResponse = await fetch('api/reserved_seat', {
+		    method: 'POST',
+		    headers: {
+			"Accept": "application/json",
+			"Content-Type": "application/json"
+		    },
+		    body: JSON.stringify({
+			"concert_id": concerts[i].concert_id,
+			"seat_no": want_reserved_seat
+		    })
+		});
+		const content = await rawResponse.json();
+		console.log(content);
+	    } catch (error) {
+		console.error(error.message);
+	    }
+	});
+    }
+};
+
+const main = async() => {
+    let concerts = await get('api/concert');
+    let seats = [];
+    for (i in concerts) {
+	let concert_seat = await get(`api/concert_seat/${concerts[i].concert_id}`);
+	let reserved_seat = await get(`api/reserved_seat/${concerts[i].concert_id}`);
+	seats.push({"concert_seat": concert_seat, "reserved_seat": reserved_seat});
+    }
+
+    console.log(seats);
+    await add_concerts(concerts);
+    await seats_selector(concerts, seats);
+};
+
+main();
 
 async function viewSeats(concertId) {
     try {
