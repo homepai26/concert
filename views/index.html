@@ -6,42 +6,28 @@
 	<title>ระบบจองที่นั่ง บัตรคอนเสิร์ต</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
     </head>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-	<div class="container-fluid">
-	    <a class="navbar-brand" href="#">Navbar w/ text</a>
-	    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-		<span class="navbar-toggler-icon"></span>
-	    </button>
-	    <div class="collapse navbar-collapse" id="navbarText">
-		<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-		    <li class="nav-item">
-			<a class="nav-link active" aria-current="page" href="#">Home</a>
-		    </li>
-		    <li class="nav-item">
-			<a class="nav-link" href="#">Features</a>
-		    </li>
-		    <li class="nav-item">
-			<a class="nav-link" href="#">Pricing</a>
-		    </li>
-		</ul>
-		<span class="navbar-text">
-		    Navbar text with an inline element
-		</span>
-	    </div>
-	</div>
-    </nav>
     <body>
+	<nav><!-- javascript handle this --></nav>
 	<div class="alert alert-info" role="alert" style="display: none" id="login-alart">
 	    คุณยังไม่ได้ล็อกอิน <a href="/login" class="alert-link">คลิกที่นี่</a>เพื่อที่จะล็อกอิน
+	</div>
+	<div class="container-fluid text-center" style="height: 400px; background: url('/pic/concert_banner.jpg')">
+	    <div class="position-relative top-50 start-50 translate-middle text-white">
+		<h2 class="display-2 ">ระบบจองที่นั่ง บัตรคอนเสิร์ต</h2>
+		<p class="fs-4">ยินดีต้อนรับเข้าสู่ระบบจองบัตรคอนเสิร์ตของเรา โปรดคุณเลือกคอนเสิร์ตที่ต้องการ</p>
+	    </div>
 	</div>
 	<div id="modals">
 	    <!-- modal here -->
 	</div>
-	<div class="container text-center" id="concerts_frame">
-	    <h2 class="display-2 text-center">ระบบจองที่นั่ง บัตรคอนเสิร์ต</h2>
-	    <!-- concert list here -->
+	<div class="container text-center overflow-hidden" id="concert-container">
+	    
+	    <div class="row row-cols-4" id="concert-list">
+		<!-- concert list here -->
+	    </div>
 	</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+	<script src="scripts/nav.js"></script>
 	<script src="scripts/pull_concert_info.js"></script>
     </body>
 </html>

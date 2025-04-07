@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+
 const pool = mysql.createPool({
     host: 'warit.pp.ua',
     user: 'concert_user',

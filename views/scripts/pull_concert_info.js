@@ -1,5 +1,3 @@
-const concertsFrame = document.getElementById('concerts_frame');
-const modals = document.getElementById('modals');
 
 const get_cookie = () => {
     return document.cookie.match(/^(.*;)?\s*token\s*=\s*[^;]+(.*)?$/);
@@ -20,24 +18,22 @@ const get = async (url) => {
     return null;
 };
 
+const concertsFrame = document.getElementById('concerts_frame');
+const modals = document.getElementById('modals');
+const concert_list = document.getElementById('concert-list');
 
-const add_concerts = async (concerts) => {
+const add_concerts = async (concerts, seats) => {
     var count = 0;
-    await concerts.forEach((concert) => {
-        if (count % 5 == 0) {
-            row = document.createElement('div');
-            row.classList.add('row');
-            concertsFrame.appendChild(row);
-        }
-
-        row.innerHTML +=
-	    `<div class="card" style="width: 18rem; margin: 20px ">` +
-	    `<img src="..." class="card-img-top" alt="...">` +
+    concerts.forEach((concert) => {
+        
+        concert_list.innerHTML +=
+	    `<div class="card col m-3">` +
+	    `<img src="/pic/concert_${concert.concert_id}.png" class="card-img-top" alt="picture of concert ${concert.concert_name}">` +
 	    `<div class="card-body">` +
 	    `<h5 class="card-title">${concert.concert_name}</h5>` +
 	    //`<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>` +
 	`</div>` +
-	    `<ul class="list-group list-group-flush">` +
+	    `<ul class="list-group list-group-flush" id="metadata-concert-${concert.concert_id}">` +
 	    `<li class="list-group-item">${concert.concert_artist}</li>` +
 	    `<li class="list-group-item">${concert.concert_venue}</li>` +
 	    `<li class="list-group-item">${concert.concert_timeshow}</li>` +
@@ -49,7 +45,17 @@ const add_concerts = async (concerts) => {
 	    `</button>` +
 	    `</div>` +
 	    `</div>`;
-	
+
+	let metadata_concert = document.getElementById(`metadata-concert-${concert.concert_id}`);
+	let concert_seat = seats[concert.concert_id-1].concert_seat;
+	let all_seat_available = 0;
+	concert_seat.forEach((seat) => {
+	    all_seat_available += seat.seat_available;
+	});
+	let metadata_child = document.createElement('li');
+	metadata_child.classList.add('list-group-item');
+	metadata_child.innerText = `Available ${all_seat_available} seat`;
+	metadata_concert.appendChild(metadata_child);
 	count++;
     });
 };
@@ -148,78 +154,79 @@ const main = async() => {
     }
 
     console.log(seats);
-    await add_concerts(concerts);
+    await add_concerts(concerts, seats);
     await seats_selector(concerts, seats);
     lock_login(concerts, seats);
 };
 
 main();
 
-async function viewSeats(concertId) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/concert_seat/${concertId}`);
-        const seats = await response.json();
+// async function viewSeats(concertId) {
+//     try {
+//         const response = await fetch(`${API_BASE_URL}/concert_seat/${concertId}`);
+//         const seats = await response.json();
 
-        // สร้าง modal สำหรับแสดงที่นั่ง
-        const seatModal = document.createElement('div');
-        seatModal.className = 'modal';
-        seatModal.id = 'seat-modal';
+//         // สร้าง modal สำหรับแสดงที่นั่ง
+//         const seatModal = document.createElement('div');
+//         seatModal.className = 'modal';
+//         seatModal.id = 'seat-modal';
 
-        let seatHtml = `
-            <div class="modal-content">
-                <h2>เลือกที่นั่ง</h2>
-                <div class="seat-container">
-        `;
+//         let seatHtml = `
+//             <div class="modal-content">
+//                 <h2>เลือกที่นั่ง</h2>
+//                 <div class="seat-container">
+//         `;
 
-        // จัดกลุ่มที่นั่งตามประเภท
-        const seatTypes = {};
-        seats.forEach(seat => {
-            if (!seatTypes[seat.type]) {
-                seatTypes[seat.type] = {
-                    price: seat.price,
-                    seats: []
-                };
-            }
-            seatTypes[seat.type].seats.push(seat);
-        });
+//         // จัดกลุ่มที่นั่งตามประเภท
+//         const seatTypes = {};
+//         seats.forEach(seat => {
+//             if (!seatTypes[seat.type]) {
+//                 seatTypes[seat.type] = {
+//                     price: seat.price,
+//                     seats: []
+//                 };
+//             }
+//             seatTypes[seat.type].seats.push(seat);
+//         });
 
-        // แสดงที่นั่งแต่ละประเภท
-        for (const [type, data] of Object.entries(seatTypes)) {
-            seatHtml += `
-                <div class="seat-type">
-                    <h3>${type} - ${data.price} บาท</h3>
-                    <div class="seat-grid">
-            `;
+//         // แสดงที่นั่งแต่ละประเภท
+//         for (const [type, data] of Object.entries(seatTypes)) {
+//             seatHtml += `
+//                 <div class="seat-type">
+//                     <h3>${type} - ${data.price} บาท</h3>
+//                     <div class="seat-grid">
+//             `;
 
-            for (let i = data.seats[0].seat_start; i <= data.seats[0].seat_end; i++) {
-                const isAvailable = data.seats[0].seat_available > 0;
-                seatHtml += `
-                    <button 
-                        class="seat-button ${isAvailable ? 'available' : 'unavailable'}"
-                        onclick="bookSeat(${concertId}, ${i}, '${type}', ${data.price})"
-                        ${!isAvailable ? 'disabled' : ''}
-                    >
-                        ${i}
-                    </button>
-                `;
-            }
+//             for (let i = data.seats[0].seat_start; i <= data.seats[0].seat_end; i++) {
+//                 const isAvailable = data.seats[0].seat_available > 0;
+//                 seatHtml += `
+//                     <button 
+//                         class="seat-button ${isAvailable ? 'available' : 'unavailable'}"
+//                         onclick="bookSeat(${concertId}, ${i}, '${type}', ${data.price})"
+//                         ${!isAvailable ? 'disabled' : ''}
+//                     >
+//                         ${i}
+//                     </button>
+//                 `;
+//             }
 
-            seatHtml += `
-                    </div>
-                </div>
-            `;
-        }
+//             seatHtml += `
+//                     </div>
+//                 </div>
+//             `;
+//         }
 
-        seatHtml += `
-                </div>
-                <button onclick="closeSeatModal()" class="close-button">ปิด</button>
-            </div>
-        `;
+//         seatHtml += `
+//                 </div>
+//                 <button onclick="closeSeatModal()" class="close-button">ปิด</button>
+//             </div>
+//         `;
 
-        seatModal.innerHTML = seatHtml;
-        document.body.appendChild(seatModal);
-        seatModal.style.display = 'block';
-    } catch (error) {
-        console.error('Error loading seats:', error);
-    }
-}
+//         seatModal.innerHTML = seatHtml;
+//         document.body.appendChild(seatModal);
+//         seatModal.style.display = 'block';
+//     } catch (error) {
+//         console.error('Error loading seats:', error);
+//     }
+// }
+

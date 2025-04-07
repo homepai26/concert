@@ -6,8 +6,15 @@ const encrypt = require('./encrypt');
 const login = require('./handle/login');
 const datetime = require('./handle/datetime');
 
+var conn;
+
+const get_conn = async() => {
+    conn = await pool.getConnection();
+};
+
+get_conn();
+
 router.post('/concert', async(req, res) => {
-    var conn = await pool.getConnection();
     try {
 	await conn.execute('START TRANSACTION');
 	result1 = await sql.add_concert_info(conn, req.body.concert_name, req.body.concert_artist,
@@ -25,25 +32,19 @@ router.post('/concert', async(req, res) => {
 	await conn.execute('ROLLBACK');
 	res.send(error);
     }
-
-    conn.release();
 });
 
 router.get('/concert', async(req, res) => {
     try {
-	var conn = await pool.getConnection();
 	result = await sql.view_concert_info(conn);
 	res.json(result);
     } catch (error) {
 	res.send(error);
     }
-
-    conn.release();
 });
 
 router.post('/register', async(req, res) => {
     try {
-	var conn = await pool.getConnection();
 	console.log(req.body);
 	if (req.body.id.length) {
 	    let hash_passwd = await encrypt.hash_password(req.body.password);
@@ -59,8 +60,6 @@ router.post('/register', async(req, res) => {
     } catch(error) {
 	res.send(error);
     }
-
-    conn.release();
 });
 
 router.post('/login', async(req, res) => {
@@ -71,7 +70,6 @@ router.post('/login', async(req, res) => {
 	    res.send('No email or password');
 	}
 
-	var conn = await pool.getConnection();
 	let [[row], field] = await conn.execute('SELECT customer_id, name, password FROM customer WHERE email = ?', [email]);
 	let is_valid_password = await encrypt.check_password(password, row.password);
 	if (is_valid_password) {
@@ -87,7 +85,6 @@ router.post('/login', async(req, res) => {
 });
 
 router.post('/reserved_seat', async(req, res) => {
-    var conn = await pool.getConnection();
     try {
 	let { customer_id } = login.get_value(req.cookies.token);
 	console.log(`reserved seat customer ${customer_id}`);
@@ -121,13 +118,10 @@ router.post('/reserved_seat', async(req, res) => {
 	await conn.execute('ROLLBACK');
 	res.send(error);
     }
-
-    conn.release();
 });
 
 router.get('/concert_seat/:id', async(req, res) => {
     try {
-	var conn = await pool.getConnection();
 	result = await sql.view_concert_seat(conn, req.params.id);
 	res.json(result);
     } catch (error) {
@@ -137,7 +131,6 @@ router.get('/concert_seat/:id', async(req, res) => {
 
 router.get('/reserved_seat/:id', async(req, res) => {
     try {
-	var conn = await pool.getConnection();
 	result = await sql.view_reserved_seat(conn, req.params.id);
 	res.json(result);
     } catch (error) {
@@ -147,7 +140,6 @@ router.get('/reserved_seat/:id', async(req, res) => {
 
 router.get('/ticket', async(req, res) => {
     try {
-	var conn = await pool.getConnection();
 	let {_, name} = login.get_value(req.cookies.token);
 	[row, field] = await conn.execute('SELECT * FROM ticket WHERE name = ?', [name]);;
 	res.json(row);
