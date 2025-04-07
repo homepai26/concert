@@ -1,8 +1,8 @@
 const concertsFrame = document.getElementById('concerts_frame');
 const modals = document.getElementById('modals');
 
-const get_cookie = (cookie) => {
-    return document.cookie.match(`/^(.*;)?\s*${cookie}\s*=\s*[^;]+(.*)?$/`);
+const get_cookie = () => {
+    return document.cookie.match(/^(.*;)?\s*token\s*=\s*[^;]+(.*)?$/);
 };
 
 const get = async (url) => {
@@ -128,13 +128,14 @@ const lock_login = async(concerts) => {
     if (!get_cookie('token')) {
 	let login_alert = document.getElementById('login-alart');
 	login_alert.style.display = 'block';
+	
+	concerts.forEach((concert) => {
+	    console.log(`modal-send-btn-concert-${concert.concert_id}`);
+	    let reserved_btn_concert = document.getElementById(`reserved-btn-concert-${concert.concert_id}`);
+	    reserved_btn_concert.setAttribute('disabled', '');
+	});
+	
     }
-
-    concerts.forEach((concert) => {
-	console.log(`modal-send-btn-concert-${concert.concert_id}`);
-	let reserved_btn_concert = document.getElementById(`reserved-btn-concert-${concert.concert_id}`);
-	reserved_btn_concert.setAttribute('disabled', '');
-    });
 };
 
 const main = async() => {
