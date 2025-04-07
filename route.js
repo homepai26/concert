@@ -75,7 +75,8 @@ router.post('/login', async(req, res) => {
 	if (is_valid_password) {
 	    token = login.gen_customer_token(row.customer_id, row.name);
 	    res.cookie('token', token);
-	    res.json(token);
+	    res.cookie('name', row.name);
+	    res.json({"token": token, "name": row.name});
 	} else {
 	    res.send("Wrong password");
 	}

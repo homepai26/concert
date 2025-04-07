@@ -1,24 +1,5 @@
 const ticket_list = document.getElementById('ticket-list');
 
-const get_cookie = () => {
-    return document.cookie.match(/^(.*;)?\s*token\s*=\s*[^;]+(.*)?$/);
-};
-
-const get = async (url) => {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        const json = await response.json();
-        return json;
-    } catch (error) {
-        console.error(error.message);
-    }
-    return null;
-};
-
   // <li class="list-group-item d-flex justify-content-between align-items-start">
   //   <div class="ms-2 me-auto">
   //     <div class="fw-bold">Subheading</div>
