@@ -20,16 +20,15 @@ nav.innerHTML +=
     `<ul class="navbar-nav me-auto mb-2 mb-lg-0">` +
     `<li class="nav-item">` +
     `<a class="nav-link" href="/" id="reserved-seat" name="reserved_seat">จองบัตรคอนเสิร์ต</a>` +
-    //`<a class="nav-link active" aria-current="page" href="#">จองบัตรคอนเสิร์ต</a>` +
     `</li>` +
     `<li class="nav-item">` +
     `<a class="nav-link" href="/ticket" id="ticket" name="ticket">บัตรของฉัน</a>` +
     `</li>` +
     `<li class="nav-item">` +
-    `<a class="nav-link" href="/login" id="login" name="login">เข้าสู่ระบบ</a>` +
+    `<a class="nav-link" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal" id="login" name="login">เข้าสู่ระบบ</a>` +
     `</li>` +
     `<li class="nav-item">` +
-    `<a class="nav-link" href="/register" id="register" name="register">ลงทะเบียน</a>` +
+    `<a class="nav-link" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#register-modal" id="register" name="register">สมัครเข้าใช้งาน</a>` +
     `</li>` +
     `</ul>` +
     `<div class="d-flex" id="user-component">` +
@@ -39,6 +38,7 @@ nav.innerHTML +=
     `</div>` +
     `</div>`;
 
+// current page
 const current_path = window.location.pathname;
 let nav_link = document.querySelectorAll('.nav-link');
 if (current_path != '/') {
@@ -55,6 +55,41 @@ if (current_path != '/') {
     reserved_seat.setAttribute('aria-current', 'page');
 }
 
+const login = document.getElementById('login-modal');
+const register = document.getElementById('register-modal');
+
+// handle login event
+let submit_login_btn = document.getElementById('login-btn');
+
+submit_login_btn.addEventListener('click', async() => {
+    let email = login.querySelector('#email').value;
+    let password = login.querySelector('#password').value;
+    console.log('wore kefe')
+    
+    if (email && password) {
+	try {
+	    let login_result = await fetch('/api/login', {
+		method: "POST",
+		headers: {
+		    "Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+		    email: email,
+		    password: password
+		}),
+	    });
+	    
+	    let login_json_result = await login_result.json();
+	    localStorage.setItem('name', login_json_result.name);
+	    location.reload();
+	} catch (error) {
+	    console.error(error);
+	}
+    }
+});
+
+
+// lock corresponding interface if login or not login
 if (get_cookie()) {
     let login = document.getElementById('login');
     let register = document.getElementById('register');
@@ -68,6 +103,7 @@ if (get_cookie()) {
     ticket.setAttribute('aria-disabled', 'true');
 }
 
+// handle username
 const username = localStorage.getItem('name');
 let nav_name = document.getElementById('user');
 let user_component = document.getElementById('user-component');
@@ -87,3 +123,4 @@ if (username) {
 } else {
     nav_name.textContent = `สวัสดีคุณนิรนาม ผู้ไม่ระบุตัวตน อัศวินแห่งรัตติกาล`;
 }
+

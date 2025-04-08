@@ -10,15 +10,14 @@ const add_concerts = async (concerts, seats) => {
 	    `<div class="card col m-3">` +
 	    `<img src="/pic/concert_${concert.concert_id}.png" class="card-img-top" alt="picture of concert ${concert.concert_name}">` +
 	    `<div class="card-body">` +
-	    `<h5 class="card-title">${concert.concert_name}</h5>` +
-	    //`<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>` +
-	`</div>` +
+	    `<h5 class="card-title fw-bold text-center">${concert.concert_name}</h5>` +
+	    `</div>` +
 	    `<ul class="list-group list-group-flush" id="metadata-concert-${concert.concert_id}">` +
 	    `<li class="list-group-item">${concert.concert_artist}</li>` +
 	    `<li class="list-group-item">${concert.concert_venue}</li>` +
 	    `<li class="list-group-item">${concert.concert_timeshow}</li>` +
 	    `</ul>` +
-	    `<div class="card-body">` +
+	    `<div class="card-body text-center">` +
 	    `<button type="button" class="btn btn-primary" data-bs-toggle="modal"` +
 	    `data-bs-target="#concert_${concert.concert_id}" id="reserved-btn-concert-${concert.concert_id}">` +
 	    `จองที่นั่ง` +
@@ -45,7 +44,7 @@ const seats_selector = async(concerts, seats) => {
 	modals.innerHTML +=
 	    `<div class="modal fade modal-dialog-scrollable" id="concert_${concerts[i].concert_id}" ` +
 	    `tabindex="-1" aria-labelledby="exampleModalLabelconcert_${concerts[i].concert_id}" aria-hidden="true">` +
-	    `<div class="modal-dialog">` +
+	    `<div class="modal-dialog modal-lg">` +
 	    `<div class="modal-content">` +
 	    `<div class="modal-header">` +
 	    `<h1 class="modal-title fs-5" id="exampleModalLabelconcert_${concerts[i].concert_id}">` +
@@ -113,7 +112,7 @@ const seats_selector = async(concerts, seats) => {
 const lock_login = async(concerts) => {
     if (!get_cookie('token')) {
 	let login_alert = document.getElementById('login-alart');
-	login_alert.style.display = 'block';
+	login_alert.classList.replace('d-none', 'd-block');
 	
 	concerts.forEach((concert) => {
 	    console.log(`modal-send-btn-concert-${concert.concert_id}`);
