@@ -85,6 +85,17 @@ router.post('/login', async(req, res) => {
     }
 });
 
+router.post('/payment', async(req, res) => {
+    try {
+	let { customer_id } = login.get_value(req.cookies.token);
+	console.log(`customer_id ${customer_id} sent payment request`);
+	let result = await sql.add_payment(conn, customer_id, req.body.concert_id, req.body.seat_no, req.body.datetime);
+	res.json(result);
+    } catch(error) {
+	res.send(error);
+    }
+});
+
 router.post('/reserved_seat', async(req, res) => {
     try {
 	let { customer_id } = login.get_value(req.cookies.token);
@@ -112,7 +123,7 @@ router.post('/reserved_seat', async(req, res) => {
 					   concert_info_row.concert_venue, concert_info_row.seat_no,
 					   datetime.get_gnu_datetime(concert_info_row.concert_timeshow),
 					   datetime.get_gnu_local_datetime());
-	console.log(`addind ticket using ${concert_info_row} and convert ${datetime.get_gnu_datetime(concert_info_row.concert_timeshow)}, ${datetime.get_gnu_local_datetime()}`);
+	console.log(`adding ticket using ${concert_info_row} and convert ${datetime.get_gnu_datetime(concert_info_row.concert_timeshow)}, ${datetime.get_gnu_local_datetime()}`);
 	await conn.execute('COMMIT');
 	res.json({result1, result2, result3});
     } catch(error) {

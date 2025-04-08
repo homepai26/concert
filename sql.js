@@ -57,6 +57,14 @@ const add_ticket = async(conn, concert_name, name, venue, seat, timeshow, purcha
     return result;
 };
 
+const add_payment = async(conn, customer_id, concert_id, seat_no, datetime) => {
+    if (customer_id && concert_id && seat_no && datetime) {
+	[result] = await conn.execute('INSERT INTO payment VALUES(?,?,?,?)', [customer_id, concert_id, seat_no, datetime]);
+    }
+    return result;
+};
+
+
 const view_concert_info = async(conn) => {
     [row, field] = await conn.execute('SELECT * FROM concert_info');
     return row;
@@ -83,6 +91,7 @@ module.exports.add_foreign_customer = add_foreign_customer;
 module.exports.add_reserved_seat = add_reserved_seat;
 module.exports.add_seat_type = add_seat_type;
 module.exports.add_ticket = add_ticket;
+module.exports.add_payment = add_payment;
 module.exports.view_concert_info = view_concert_info;
 module.exports.view_concert_seat = view_concert_seat;
 module.exports.view_reserved_seat = view_reserved_seat;

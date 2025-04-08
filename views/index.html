@@ -90,7 +90,7 @@
 				<input type="text" class="form-control" name="passport" id="register-passport" placeholder="">
 			    </div>
 			    <div class="mb-3">
-				<label for="passport" class="form-label" >วัน เดือน ปีเกิด</label>
+				<label for="register-birthdate" class="form-label" >วัน เดือน ปีเกิด</label>
 				<input type="date" class="form-control" name="birthdate" id="register-birthdate">
 			    </div>
 			</form>
@@ -103,10 +103,28 @@
 	    </div>
 	</div>
 
+	<!-- payment modal -->
+	<div class="modal fade modal-dialog-scrollable" id="payment-modal" tabindex="-1" aria-labelledby="payment-title" aria-hidden="true">
+	    <div class="modal-dialog modal-lg">
+		<div class="modal-content">
+		    <div class="modal-header">
+			<h1 class="modal-title fs-5" id="payment-title">
+			</h1>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		    </div>
+		    <div class="modal-body" id="payment-modal-body">
+		    </div>
+		    <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิดหน้านี้</button>
+			<button type="button" class="btn btn-primary" id="payment-modal-btn">จองเลย!</button>
+		    </div>
+		</div>
+	    </div>
+	</div>
 	
 	<div id="modal-append">
 	    <!-- concert reserved seat modal here -->
-	    
+	    <button type="button" id="nowork">ค</button>
 	</div>
 	<div class="container text-center overflow-hidden" id="concert-container">
 	    
