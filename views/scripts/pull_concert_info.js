@@ -1,5 +1,5 @@
 const concertsFrame = document.getElementById('concerts_frame');
-const modals = document.getElementById('modals');
+const modal_append = document.getElementById('modal-append');
 const concert_list = document.getElementById('concert-list');
 
 const add_concerts = async (concerts, seats) => {
@@ -41,7 +41,7 @@ const add_concerts = async (concerts, seats) => {
 
 const seats_selector = async(concerts, seats) => {
     for (i in concerts) {
-	modals.innerHTML +=
+	modal_append.innerHTML +=
 	    `<div class="modal fade modal-dialog-scrollable" id="concert_${concerts[i].concert_id}" ` +
 	    `tabindex="-1" aria-labelledby="exampleModalLabelconcert_${concerts[i].concert_id}" aria-hidden="true">` +
 	    `<div class="modal-dialog modal-lg">` +

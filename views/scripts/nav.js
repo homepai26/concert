@@ -38,6 +38,94 @@ nav.innerHTML +=
     `</div>` +
     `</div>`;
 
+// login modal handler
+const login_modal = document.getElementById('login-modal');
+const register_modal = document.getElementById('register-modal');
+
+let login_btn = login_modal.querySelector('.submit');
+login_btn.addEventListener('click', async() => {
+    let email = login_modal.querySelector('#login-email').value;
+    let password = login_modal.querySelector('#login-password').value;
+
+    if (email && password) {
+	let login_result = await fetch('/api/login', {
+	    method: "POST",
+	    headers: {
+		"Content-Type": "application/json",
+	    },
+	    body: JSON.stringify({
+		"email": email,
+		"password": password
+	    }),
+	});
+
+	if (!login_result.ok) {
+	    console.error(login_result);
+	}
+
+	// here we get cookie and name to localStorage
+	let login_json_result = await login_result.json();
+	console.log(login_json_result);
+	localStorage.setItem('name', login_json_result.name);
+	//location.reload();
+    }
+});
+
+// now with register
+let register_foreign_checkbox = register_modal.querySelector('#register-foreign-checkbox');
+register_foreign_checkbox.checked = false;
+register_foreign_checkbox.addEventListener('change', (e) => {
+    let id = register_modal.querySelector('#register-id-div');
+    let passport = register_modal.querySelector('#register-passport-div');
+    
+    console.log(id);
+    console.log(passport);
+    
+    if (e.target.checked) {
+	id.classList.replace('d-block', 'd-none');
+	passport.classList.replace('d-none', 'd-block');
+    } else {
+	passport.classList.replace('d-block', 'd-none');
+	id.classList.replace('d-none', 'd-block');
+    }
+});
+
+let register_btn = register_modal.querySelector('.submit');
+register_btn.addEventListener('click', async() => {
+    let name = register_modal.querySelector('#register-name').value;
+    let email = register_modal.querySelector('#register-email').value;
+    let password = register_modal.querySelector('#register-password').value;
+    let id = register_modal.querySelector('#register-id').value;
+    let passport = register_modal.querySelector('#register-passport').value;
+    let birthdate = register_modal.querySelector('#register-birthdate').value;
+
+    
+    if (name && email && password && (id || passport) && birthdate) {
+	let register_result = await fetch('/api/register', {
+	    method: "POST",
+	    headers: {
+		"Content-Type": "application/json",
+	    },
+	    body: JSON.stringify({
+		"name": name,
+		"email": email,
+		"password": password,
+		"id": id,
+		"passport": passport,
+		"birthdate": birthdate
+	    }),
+	});
+
+	if (!register_result.ok) {
+	    console.error(register_result);
+	    console.log('error!');
+	}
+
+	let register_json_result = await register_result.json();
+	console.log(register_json_result);
+    }
+});
+
 // current page
 const current_path = window.location.pathname;
 let nav_link = document.querySelectorAll('.nav-link');
@@ -54,40 +142,6 @@ if (current_path != '/') {
     reserved_seat.classList.add('active');
     reserved_seat.setAttribute('aria-current', 'page');
 }
-
-const login = document.getElementById('login-modal');
-const register = document.getElementById('register-modal');
-
-// handle login event
-let submit_login_btn = document.getElementById('login-btn');
-
-submit_login_btn.addEventListener('click', async() => {
-    let email = login.querySelector('#email').value;
-    let password = login.querySelector('#password').value;
-    console.log('wore kefe')
-    
-    if (email && password) {
-	try {
-	    let login_result = await fetch('/api/login', {
-		method: "POST",
-		headers: {
-		    "Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-		    email: email,
-		    password: password
-		}),
-	    });
-	    
-	    let login_json_result = await login_result.json();
-	    localStorage.setItem('name', login_json_result.name);
-	    location.reload();
-	} catch (error) {
-	    console.error(error);
-	}
-    }
-});
-
 
 // lock corresponding interface if login or not login
 if (get_cookie()) {
