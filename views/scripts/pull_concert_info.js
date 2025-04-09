@@ -8,7 +8,7 @@ const add_concerts = async (concerts, seats) => {
         
         concert_list.innerHTML +=
 	    `<div class="card col m-3">` +
-	    `<img src="/pic/concert_${concert.concert_id}.png" class="card-img-top" alt="picture of concert ${concert.concert_name}">` +
+	    `<img src="/pic/concert_${concert.concert_id}.png" class="card-img-top" width="304" height="206" alt="picture of concert ${concert.concert_name}">` +
 	    `<div class="card-body">` +
 	    `<h5 class="card-title fw-bold text-center">${concert.concert_name}</h5>` +
 	    `</div>` +
@@ -33,7 +33,7 @@ const add_concerts = async (concerts, seats) => {
 	});
 	let metadata_child = document.createElement('li');
 	metadata_child.classList.add('list-group-item');
-	metadata_child.innerText = `Available ${all_seat_available} seat`;
+	metadata_child.innerText = `ว่าง ${all_seat_available} ที่นั่ง`;
 	metadata_concert.appendChild(metadata_child);
 	count++;
     });
@@ -71,7 +71,7 @@ const seats_selector = async(concerts, seats) => {
 	    for (let k = seats[i].concert_seat[j].seat_start; k <= seats[i].concert_seat[j].seat_end; k++) {
 		modal_body.innerHTML +=
 		    `<div class="form-check form-check-inline">` +
-		    `<input class="form-check-input" seat-type="${seats[i].concert_seat[j].type}" price="${seats[i].concert_seat[j].price}" name="seat_radio" type="radio" id="seat${k}" value="${k}">` +
+		    `<input class="form-check-input" seat-type="${seats[i].concert_seat[j].type}" price="${seats[i].concert_seat[j].price}" concert-id="${concerts[i].concert_id}" concert-name="${concerts[i].concert_name}" name="seat_radio" type="radio" id="seat-${concerts[i].concert_id}-${k}" value="${k}">` +
 		    `<label class="form-check-label" for="seat${k}">${k}</label>` +
 		    `</div>`;
 	    }
@@ -81,35 +81,41 @@ const seats_selector = async(concerts, seats) => {
     // disable if have reserved and button event
     for (i in concerts) {
 	seats[i].reserved_seat.forEach((reserved) => {
-	    let select_seat = document.getElementById(`seat${reserved.seat_no}`);
+	    let select_seat = document.getElementById(`seat-${concerts[i].concert_id}-${reserved.seat_no}`);
 	    select_seat.setAttribute('disabled', '');
 	});
 
+	
 	let concert_modal_reserved_seat_btn = document.getElementById(`concert-modal-reserved-seat-btn-${concerts[i].concert_id}`);
 	// build payment modal
 	concert_modal_reserved_seat_btn.addEventListener('click', () => {
 	    let payment_title = document.getElementById('payment-title');
 	    let payment_modal_body = document.getElementById('payment-modal-body');
+	    console.log('concert_id:' + concerts[i].concert_id + ', concert_name' + concerts[i].concert_name);
 
 	    // little cleanup
 	    payment_title.textContent = "";
 	    payment_modal_body.innerHTML = "";
 	    
 	    let want_reserved_seat = document.querySelector('input[name="seat_radio"]:checked');
-	    payment_title.textContent = `ชำระค่าบัตรคอนเสิร์ต ${concerts[i].concert_name}`;
+	    payment_title.textContent = `ชำระค่าบัตรคอนเสิร์ต ${want_reserved_seat.getAttribute('concert-name')}`;
 	    let payment_seat_type = document.createElement('p');
 	    payment_seat_type.textContent = `ที่นั่ง: ${want_reserved_seat.getAttribute('seat-type')}`;
+	    payment_seat_type.classList.add('fs-4');
 	    let payment_seat_price = document.createElement('p');
 	    payment_seat_price.textContent = `ราคา: ${want_reserved_seat.getAttribute('price')}`;
+	    payment_seat_price.classList.add('fs-4');
 	    payment_modal_body.appendChild(payment_seat_type);
 	    payment_modal_body.appendChild(payment_seat_price);
 
 	    payment_modal_body.innerHTML +=
+		`<div class="d-flex justify-content-center mb-3">` +
 		`<img src="/pic/qr.jpeg">` +
-		`<div class="mb-3">` +
-		`<label for="slip-pic" class="form-label">แนบไฟล์สลิป</label>` +
-		`<input class="form-control" type="file" id="slip-pic">` +
 		`</div>` +
+		// `<div class="mb-3">` +
+		// `<label for="slip-pic" class="form-label">แนบไฟล์สลิป</label>` +
+		// `<input class="form-control" type="file" id="slip-pic">` +
+		// `</div>` +
 		`<div class="mb-3">` +
 		`<label for="slip-time" class="form-label" >เวลาที่โอนเงิน</label>` +
 		`<input type="datetime-local" class="form-control" name="slip-time" id="slip-time">` +
@@ -118,11 +124,15 @@ const seats_selector = async(concerts, seats) => {
 	    let payment_modal_btn = document.getElementById(`payment-modal-btn`);
 	    payment_modal_btn.addEventListener('click', async() => {
 		let want_reserved_seat = document.querySelector('input[name="seat_radio"]:checked').value;
+		let want_reserved_concert_id = document.querySelector('input[name="seat_radio"]:checked').getAttribute('concert-id');
 		try {
-		    let rawRespone, content;
+		    let rawResponse, content;
 		    let slip_time = document.getElementById('slip-time').value;
 		    let gnu_slip_time = get_gnu_datetime(slip_time);
 
+		    console.log('concert_id: ' + want_reserved_concert_id);
+		    console.log('seat_no: ' + want_reserved_seat);
+		    
 		    rawResponse = await fetch('api/payment', {
 			method: 'POST',
 			headers: {
@@ -130,13 +140,20 @@ const seats_selector = async(concerts, seats) => {
 			    "Content-Type": "application/json"
 			},
 			body: JSON.stringify({
-			    "concert_id": concerts[i].concert_id,
+			    "concert_id": want_reserved_concert_id,
 			    "seat_no": want_reserved_seat,
 			    "datetime": gnu_slip_time
 			})
 		    });
 		    content = await rawResponse.json();
+		    if (!rawResponse.ok) {
+			console.error(content.message);
+			appendAlertTo('เกิดข้อผิดพลาด ' + content.message, 'warning', 'alert-payment');
+			return;
+		    }
+
 		    console.log(content);
+		    appendAlertTo('เพิ่มบันทึกสลิปสำเร็จ', 'success', 'alert-payment');
 		    
 		    rawResponse = await fetch('api/reserved_seat', {
 			method: 'POST',
@@ -145,14 +162,22 @@ const seats_selector = async(concerts, seats) => {
 			    "Content-Type": "application/json"
 			},
 			body: JSON.stringify({
-			    "concert_id": concerts[i].concert_id,
+			    "concert_id": want_reserved_concert_id,
 			    "seat_no": want_reserved_seat
 			})
 		    });
-		    content = await rawResponse.json();
+
+		    if (!rawResponse.ok) {
+			console.error(content.message);
+			appendAlertTo('เกิดข้อผิดพลาด ' + content.message, 'warning', 'alert-payment');
+			return;
+		    }
+
 		    console.log(content);
+		    appendAlertTo('จองที่นั่งสำเร็จ', 'success', 'alert-payment');
 		} catch (error) {
 		    console.error(error.message);
+		    appendAlertTo('เกิดข้อผิดพลาด ' + error.message, 'warning', 'alert-payment');
 		}
 	    }); 
 	});
@@ -161,12 +186,12 @@ const seats_selector = async(concerts, seats) => {
 
 const lock_login = async(concerts) => {
     if (!get_cookie('token')) {
-	let login_alert = document.getElementById('login-alart');
+	let login_alert = document.getElementById('login-alert');
 	login_alert.classList.replace('d-none', 'd-block');
 	
 	concerts.forEach((concert) => {
-	    console.log(`concert-card-reserved-seat-btn-${concerts[i].concert_id}`);
-	    let reserved_btn_concert = document.getElementById(`concert-card-reserved-seat-btn-${concerts[i].concert_id}`);
+	    console.log(`concert-card-reserved-seat-btn-${concert.concert_id}`);
+	    let reserved_btn_concert = document.getElementById(`concert-card-reserved-seat-btn-${concert.concert_id}`);
 	    reserved_btn_concert.setAttribute('disabled', '');
 	});
 	
@@ -182,6 +207,7 @@ const main = async() => {
 	seats.push({"concert_seat": concert_seat, "reserved_seat": reserved_seat});
     }
 
+    console.log(concerts);
     console.log(seats);
     await add_concerts(concerts, seats);
     await seats_selector(concerts, seats);
@@ -189,8 +215,3 @@ const main = async() => {
 };
 
 main();
-
-let no_work_btn = document.querySelector('#nowork');
-no_work_btn.addEventListener('click', () => {
-    console.log('test');
-});

@@ -27,3 +27,28 @@ get_gnu_datetime = (datetime_string) => {
 	("0" + date.getUTCMinutes()).slice(-2) + ":" +
 	("0" + date.getUTCSeconds()).slice(-2);
 };
+
+const alertPlaceholder = document.getElementById('alert-inform');
+const appendAlert = (message, type) => {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+	`<div class="alert alert-${type} alert-dismissible" role="alert">`,
+	`   <div>${message}</div>`,
+	'   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+	'</div>'
+    ].join('');
+
+    alertPlaceholder.append(wrapper);
+};
+
+const appendAlertTo = (message, type, elementId) => {
+    const selectAlertPlaceholder = document.getElementById(elementId);
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+	`<div class="alert alert-${type} alert-dismissible" role="alert">`,
+	`   <div>${message}</div>`,
+	'   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+	'</div>'
+    ].join('');
+    selectAlertPlaceholder.append(wrapper);
+};

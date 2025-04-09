@@ -47,7 +47,7 @@ login_btn.addEventListener('click', async() => {
     let email = login_modal.querySelector('#login-email').value;
     let password = login_modal.querySelector('#login-password').value;
 
-    if (email && password) {
+    try {
 	let login_result = await fetch('/api/login', {
 	    method: "POST",
 	    headers: {
@@ -59,15 +59,20 @@ login_btn.addEventListener('click', async() => {
 	    }),
 	});
 
-	if (!login_result.ok) {
-	    console.error(login_result);
-	}
-
-	// here we get cookie and name to localStorage
 	let login_json_result = await login_result.json();
-	console.log(login_json_result);
-	localStorage.setItem('name', login_json_result.name);
-	//location.reload();
+	if (!login_result.ok) {
+	    appendAlertTo('เกิดข้อผิดพลาด' + login_json_result.message, 'warning', 'alert-login');
+	    console.error(login_json_result.message);
+	} else {
+	    // here we get cookie and name to localStorage
+	    console.log(login_json_result);
+	    localStorage.setItem('name', login_json_result.name);
+	    appendAlertTo('ล็อกอินสำเร็จ', 'success', 'alert-login');
+	    location.reload();
+	}
+    } catch (error) {
+	appendAlertTo('เกิดข้อผิดพลาด' + error.message, 'warning', 'alert-login');
+	console.error(error.message);
     }
 });
 
@@ -99,8 +104,7 @@ register_btn.addEventListener('click', async() => {
     let passport = register_modal.querySelector('#register-passport').value;
     let birthdate = register_modal.querySelector('#register-birthdate').value;
 
-    
-    if (name && email && password && (id || passport) && birthdate) {
+    try {
 	let register_result = await fetch('/api/register', {
 	    method: "POST",
 	    headers: {
@@ -116,13 +120,17 @@ register_btn.addEventListener('click', async() => {
 	    }),
 	});
 
-	if (!register_result.ok) {
-	    console.error(register_result);
-	    console.log('error!');
-	}
-
 	let register_json_result = await register_result.json();
-	console.log(register_json_result);
+	if (!register_result.ok) {
+	    console.error(register_json_result.message);
+	    appendAlertTo('เกิดข้อผิดพลาด' + register_json_result.message, 'warning', 'alert-register');
+	} else {
+	    appendAlertTo('ลงทะเบียนสำเร็จ โปรดล็อกอินอีกครั้งด้วยบัญชีที่สมัคร' + register_json_result.message, 'success', 'alert-register');
+	    console.log(register_json_result);
+	}
+    } catch (error) {
+	console.error(error.message);
+	appendAlertTo('เกิดข้อผิดพลาด' + error.message, 'warning', 'alert-register');
     }
 });
 

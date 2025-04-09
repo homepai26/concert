@@ -7,6 +7,15 @@ var cookieParser = require('cookie-parser');
 // const encrypt = require('./encrypt');
 
 const app = express();
+app.use((req, res, next) => {
+    let date = new Date();
+    console.log(req.path);
+    console.log('Time: ' + date.toLocaleTimeString());
+    console.log(req.host);
+    console.log(req.ip);
+    next();
+});
+
 app.use(cors());
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());

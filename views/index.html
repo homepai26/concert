@@ -9,7 +9,7 @@
     <body>
 	<nav><!-- javascript handle this --></nav>
 	<div class="container-fluid text-center p-2 position-relative" style="height: 600px; background: url('/pic/concert_banner.jpg')">
-	    <div class="alert alert-info ms-auto d-none text-start" role="alert" id="login-alart">
+	    <div class="alert alert-info ms-auto d-none text-start" role="alert" id="login-alert">
 		คุณยังไม่ได้ล็อกอิน <a href="/login" class="alert-link" data-bs-toggle="modal" data-bs-target="#login-modal">คลิกที่นี่</a>เพื่อที่จะล็อกอิน
 	    </div>
 	    <div class="position-absolute top-50 start-50 translate-middle text-white d-block">
@@ -31,6 +31,7 @@
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		    </div>
 		    <div class="modal-body">
+			<div class="m-3 sticky-top" id="alert-login"></div>
 			<form>
 			    <div class="mb-3">
 				<label for="email" class="form-label">อีเมล</label>
@@ -60,6 +61,7 @@
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		    </div>
 		    <div class="modal-body">
+			<div class="m-3 sticky-top" id="alert-register"></div>
 			<form action="/api/register" method="post">
 			    <div class="mb-3">
 				<label for="name" class="form-label">ชื่อ นามสกุล</label>
@@ -112,6 +114,8 @@
 			</h1>
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		    </div>
+		    <div class="m-3 sticky-top" id="alert-payment">
+		    </div>
 		    <div class="modal-body" id="payment-modal-body">
 		    </div>
 		    <div class="modal-footer">
@@ -124,11 +128,10 @@
 	
 	<div id="modal-append">
 	    <!-- concert reserved seat modal here -->
-	    <button type="button" id="nowork">ค</button>
 	</div>
 	<div class="container text-center overflow-hidden" id="concert-container">
 	    
-	    <div class="row row-cols-1 row-cols-lg-4 text-start" id="concert-list">
+	    <div class="row row-cols-1 row-cols-lg-4 text-start d-flex justify-content-around" id="concert-list">
 		<!-- concert list here -->
 	    </div>
 	</div>
