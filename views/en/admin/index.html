@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Add Concert</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    </head>
+    <body>
+	<div id="alert-inform" class="m-3 sticky-top"></div>
+	<div class="container w-50 p-3">
+	    <div id="add-concert-form">
+		<div class="mb-3">
+		    <label for="concert-name" class="form-label">Concert Name</label>
+		    <input type="text" class="form-control" id="concert-name">
+		</div>
+		<div class="mb-3">
+		    <label for="concert-artist" class="form-label">Artist</label>
+		    <input type="text" class="form-control" id="concert-artist">
+		</div>
+		<div class="mb-3">
+		    <label for="concert-venue" class="form-label">Venue</label>
+		    <input type="local-datetime" class="form-control" id="concert-venue">
+		</div>
+		<div class="mb-3">
+		    <label for="concert-timeshow" class="form-label">Timeshow</label>
+		    <input type="datetime-local" class="form-control" id="concert-timeshow">
+		</div>
+		<div id="seat-list" class="mb-3">
+		    <div class ="mb-3 d-none" id="seat-example">
+			<div class="mb-3">
+			    <label for="seat-type" class="form-label">Seat Type</label>
+			    <input type="text" class="form-control" id="seat-type">
+			</div>
+			<div class="mb-3">
+			    <label for="seat-price" class="form-label">Price</label>
+			    <input type="text" class="form-control" id="seat-price">
+			</div>
+			<div class="mb-3">
+			    <label for="seat-start" class="form-label">Seat Start At</label>
+			    <input type="text" class="form-control" id="seat-start">
+			</div>
+			<div class="mb-3">
+			    <label for="seat-end" class="form-label">Final Seat At</label>
+			    <input type="text" class="form-control" id="seat-stop">
+			</div>
+			<div class="mb-3">
+			    <label for="seat-available" class="form-label">Amount of Seat</label>
+			    <input type="text" class="form-control" id="seat-available">
+			</div>
+		    </div>
+		</div>
+		<button class="btn btn-primary form-control" id="add-seat-btn">Add More Seat</button>
+		<div class="mb-3">
+		    <label for="secret-key" class="form-label">Secert Key</label>
+		    <input type="password" class="form-control" id="secret-key">
+		</div>
+		<button type="submit" class="btn btn-primary submit">Add Concert Data</button>
+	    </div>
+	    <form id="form-pic" method="post" action="" enctype="multipart/form-data">
+		<div class="mb-3 mt-3">
+		    <label for="concert-id" class="form-label">Concert Id</label>
+		    <input type="text" class="form-control" id="concert-id" name="concert_id">
+		</div>
+		<div class="mb-3">
+		    <label for="secret-key-2" class="form-label">Secert Key</label>
+		    <input type="password" class="form-control" id="secret-key-2" name="secret_key">
+		</div>
+		<div class="mb-3">
+		    <label for="concert-pic" class="form-label">Image (PNG Only!)</label>
+		    <input class="form-control" type="file" id="concert-pic" name="concert_pic">
+		</div>
+		<div class="mb-3">
+		    <button type="submit" class="btn btn-primary submit">Add Concert Image</button>
+		</div>
+	    </form>
+	</div>
+	<script src="../scripts/share_function.js"></script>
+	 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+	<script src="script.js"></script>
+    </body>
+</html>

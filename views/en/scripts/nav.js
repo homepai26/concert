@@ -11,7 +11,7 @@ nav.innerHTML +=
     `<svg class="d-inline-block align-text-top" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-bookshelf" viewBox="0 0 16 16">` +
     `<path d="M2.5 0a.5.5 0 0 1 .5.5V2h10V.5a.5.5 0 0 1 1 0v15a.5.5 0 0 1-1 0V15H3v.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5M3 14h10v-3H3zm0-4h10V7H3zm0-4h10V3H3z"/>` +
     `</svg>` +
-    `ทิวโกอินเตอร์ จองบัตร</a>` +
+    `Tew Go Inter</a>` +
     `<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"` +
     `aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">` +
     `<span class="navbar-toggler-icon"></span>` +
@@ -19,23 +19,23 @@ nav.innerHTML +=
     `<div class="collapse navbar-collapse" id="navbarText">` +
     `<ul class="navbar-nav me-auto mb-2 mb-lg-0">` +
     `<li class="nav-item">` +
-    `<a class="nav-link" href="/" id="reserved-seat" name="reserved_seat">จองบัตรคอนเสิร์ต</a>` +
+    `<a class="nav-link" href="/en" id="reserved-seat" name="reserved_seat">Booking</a>` +
     `</li>` +
     `<li class="nav-item">` +
-    `<a class="nav-link" href="/ticket" id="ticket" name="ticket">บัตรของฉัน</a>` +
+    `<a class="nav-link" href="/en/ticket" id="ticket" name="ticket">My Ticket</a>` +
     `</li>` +
     `<li class="nav-item">` +
-    `<a class="nav-link" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal" id="login" name="login">เข้าสู่ระบบ</a>` +
+    `<a class="nav-link" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal" id="login" name="login">Login</a>` +
     `</li>` +
     `<li class="nav-item">` +
-    `<a class="nav-link" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#register-modal" id="register" name="register">สมัครเข้าใช้งาน</a>` +
+    `<a class="nav-link" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#register-modal" id="register" name="register">Register</a>` +
     `</li>` +
     `</ul>` +
     `<div class="d-flex" id="user-component">` +
     `</ul>` +
     `<ul class="navbar-nav me-auto mb-2 mb-lg-0 me-2">` +
     `<li class="nav-item">` +
-    `<a class="nav-link" href="/en" id="language" name="language">EN</a>` +
+    `<a class="nav-link" href="/" id="language" name="language">TH</a>` +
     `</li>` +
     `<span class="navbar-text" id="user">` +
     `</span>` +
@@ -53,7 +53,7 @@ login_btn.addEventListener('click', async() => {
     let password = login_modal.querySelector('#login-password').value;
 
     try {
-	let login_result = await fetch('/api/login', {
+	let login_result = await fetch('../api/login', {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json",
@@ -66,17 +66,17 @@ login_btn.addEventListener('click', async() => {
 
 	let login_json_result = await login_result.json();
 	if (!login_result.ok) {
-	    appendAlertTo('เกิดข้อผิดพลาด' + login_json_result.message, 'warning', 'alert-login');
+	    appendAlertTo('Error ' + login_json_result.message, 'warning', 'alert-login');
 	    console.error(login_json_result.message);
 	} else {
 	    // here we get cookie and name to localStorage
 	    console.log(login_json_result);
 	    localStorage.setItem('name', login_json_result.name);
-	    appendAlertTo('ล็อกอินสำเร็จ', 'success', 'alert-login');
+	    appendAlertTo('Login success', 'success', 'alert-login');
 	    location.reload();
 	}
     } catch (error) {
-	appendAlertTo('เกิดข้อผิดพลาด' + error.message, 'warning', 'alert-login');
+	appendAlertTo('Error ' + error.message, 'warning', 'alert-login');
 	console.error(error.message);
     }
 });
@@ -110,7 +110,7 @@ register_btn.addEventListener('click', async() => {
     let birthdate = register_modal.querySelector('#register-birthdate').value;
 
     try {
-	let register_result = await fetch('/api/register', {
+	let register_result = await fetch('../api/register', {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json",
@@ -128,14 +128,14 @@ register_btn.addEventListener('click', async() => {
 	let register_json_result = await register_result.json();
 	if (!register_result.ok) {
 	    console.error(register_json_result.message);
-	    appendAlertTo('เกิดข้อผิดพลาด' + register_json_result.message, 'warning', 'alert-register');
+	    appendAlertTo('Error' + register_json_result.message, 'warning', 'alert-register');
 	} else {
-	    appendAlertTo('ลงทะเบียนสำเร็จ โปรดล็อกอินอีกครั้งด้วยบัญชีที่สมัคร' + register_json_result.message, 'success', 'alert-register');
+	    appendAlertTo('Register complete, now you can login with this account' + register_json_result.message, 'success', 'alert-register');
 	    console.log(register_json_result);
 	}
     } catch (error) {
 	console.error(error.message);
-	appendAlertTo('เกิดข้อผิดพลาด' + error.message, 'warning', 'alert-register');
+	appendAlertTo('Error ' + error.message, 'warning', 'alert-register');
     }
 });
 
@@ -175,7 +175,7 @@ const username = localStorage.getItem('name');
 let nav_name = document.getElementById('user');
 let user_component = document.getElementById('user-component');
 if (username) {
-    nav_name.textContent = `สวัสดีคุณ ${username}`;
+    nav_name.textContent = `Hello ${username}`;
     let logout = document.createElement('button');
     logout.classList.add('btn');
     logout.classList.add('btn-outline-primary');
@@ -185,9 +185,9 @@ if (username) {
 	document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 	location.reload();
     });
-    logout.innerText = 'ออกจากระบบ';
+    logout.innerText = 'Logout';
     user_component.appendChild(logout);
 } else {
-    nav_name.textContent = `สวัสดีคุณนิรนาม ผู้ไม่ระบุตัวตน อัศวินแห่งรัตติกาล`;
+    nav_name.textContent = `Hello Annon`;
 }
 
